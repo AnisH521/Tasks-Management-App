@@ -33,7 +33,6 @@ export const registerUser = async (req, res) => {
     // Create a new user
     const newUser = new User({
       name,
-      surname,
       email,
       department,
       password,
