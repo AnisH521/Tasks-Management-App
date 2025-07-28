@@ -1,0 +1,24 @@
+{
+    "app": {
+        "port": 3000
+    },
+    "jwt": {
+        "access_token_secret": "ghdsjwsvhacjgkswvaiegkjsv",
+        "access_token_expires_in": "1h",
+        "refresh_token_secret": "",
+        "refresh_token_expires_in": "1d"
+    },
+    "env": "production",
+    "cors": {
+        "allowedOrigins": [
+            "http://localhost:3000",
+            "http://localhost:8800"
+        ]
+    },
+    "method": {
+        "get": "GET",
+        "post": "POST",
+        "put": "PUT",
+        "delete": "DELETE"
+    }
+}
