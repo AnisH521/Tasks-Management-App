@@ -17,11 +17,11 @@ userRouter.route("/logout")
 userRouter.route("/getEndUsers")
     .get(protectedRoute, isAdminRoute, getAllEndUsers);
 
+userRouter.route("/getSICUsers")
+    .get(protectedRoute, isAdminRoute, getAllSIC);
+
 userRouter.route("/:id")
     .get(protectedRoute, isAdminRoute, getUserById);
 
 userRouter.route("/delete/:id")
     .delete(protectedRoute, isAdminRoute, deleteUser);
-
-userRouter.route("/getSICUsers")
-    .get(protectedRoute, isAdminRoute, getAllSIC);
