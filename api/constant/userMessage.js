@@ -2,12 +2,16 @@
 export const USER_DEPARTMENTS = {
   FINANCE: "Finance",
   IT: "IT",
+  CONTROLLER: "Controller",
+  SUPERVISOR: "Supervisor"
 };
 
 // User Roles
 export const USER_ROLES = {
   END_USER: "endUser",
+  JAG: "JAG",
   SIC: "SIC",
+  ASTOFFICER: "astOfficer",
   ADMIN: "admin"
 };
 

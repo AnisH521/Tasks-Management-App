@@ -18,7 +18,7 @@ export const VALID_CATEGORIES = Object.values(TICKET_CATEGORIES);
 export const VALID_STATUSES = Object.values(TICKET_STATUSES);
 
 // Validation Messages
-export const VALIDATION_MESSAGES = {
+export const VALIDATION_MESSAGE = {
   INVALID_CATEGORY: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(', ')}`,
   INVALID_STATUS: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}`,
 };

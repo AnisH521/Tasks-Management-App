@@ -1,18 +1,27 @@
 import mongoose from "mongoose";
 import { Ticket } from "../models/ticket.model.js";
 import { User } from "../models/user.model.js";
-import { getAdminDashboard, getEndUserDashboard, getSICDashboard } from "../services/dashboard.service.js";
+import {
+  getAdminDashboard,
+  getEndUserDashboard,
+  getSICDashboard,
+} from "../services/dashboard.service.js";
 import { RESPONSE_MESSAGES } from "../constant/responseMessage.js";
-import { USER_ROLES, VALIDATION_MESSAGES } from "../constant/userMessage.js";
+import {
+  USER_ROLES,
+  VALID_DEPARTMENTS,
+  VALIDATION_MESSAGES,
+} from "../constant/userMessage.js";
+import { VALID_CATEGORIES, VALID_STATUSES, VALIDATION_MESSAGE } from "../constant/ticketMessage.js";
 
-//Controller to register a new ticket
+// Controller to register a new ticket
 // This function handles the registration of a new ticket by an end user
 export const registerTicket = async (req, res) => {
   try {
-    const { category, complaintDescription, location, sicAssigned } = req.body;
+    const { category, complaintDescription, location, jagAssigned } = req.body;
 
     // Validate required fields
-    if (!category || !complaintDescription || !sicAssigned || !location) {
+    if (!category || !complaintDescription || !jagAssigned || !location) {
       return res.status(400).json({
         status: false,
         message: RESPONSE_MESSAGES.REQUIRED_FIELDS,
@@ -53,12 +62,12 @@ export const registerTicket = async (req, res) => {
       });
     }
 
-    // find SIC by name
-    const sicUser = await User.findOne({ name: sicAssigned, role: "SIC" });
-    if (!sicUser) {
+    // find JAG by name
+    const jagUser = await User.findOne({ name: jagAssigned, role: "JAG" });
+    if (!jagUser) {
       return res.status(400).json({
         status: false,
-        message: RESPONSE_MESSAGES.SIC_NOT_FOUND,
+        message: RESPONSE_MESSAGES.JAG_NOT_FOUND,
       });
     }
 
@@ -75,9 +84,9 @@ export const registerTicket = async (req, res) => {
         room: location?.room?.trim() || "",
       },
       status: "open",
-      sicAssigned: sicAssigned,
-      sicAssignedDepartment: sicUser.department,
-      sicEmail: sicUser.email,
+      jagAssigned: jagAssigned,
+      jagAssignedDepartment: jagUser.department,
+      jagEmail: jagUser.email,
     });
 
     // Save ticket to database
@@ -132,7 +141,8 @@ export const getComplaints = async (req, res) => {
     let query = {};
 
     if (currentUser.role === USER_ROLES.END_USER) {
-      query.employeeEmail = currentUser.email;
+      // query.employeeEmail = currentUser.email;
+      query.department = currentUser.department;
     } else if (currentUser.isSIC) {
       query.sicEmail = currentUser.email;
     }
@@ -142,7 +152,7 @@ export const getComplaints = async (req, res) => {
     if (category) query.category = category;
 
     const complaints = await Ticket.find(query)
-      .populate("sicAssigned", "name surname email department")
+      .populate("jagAssigned", "name surname email department")
       .sort({ createdAt: -1 });
 
     const totalCount = await Ticket.countDocuments(query);
@@ -211,10 +221,78 @@ export const getTicketById = async (req, res) => {
   }
 };
 
+export const forwardComplaint = async (req, res) => {
+  try {
+    const { ticketId } = req.params;
+    const { department, JAGEmail } = req.body;
+
+    // Validate if ID is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(ticketId)) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid ticket ID format",
+      });
+    }
+
+    // Validate department
+    if (!VALID_DEPARTMENTS.includes(department)) {
+      return res.status(400).json({
+        status: false,
+        message: VALIDATION_MESSAGES.INVALID_DEPARTMENT,
+      });
+    }
+
+    // Find ticket by ID
+    const ticket = await Ticket.findById(ticketId);
+
+    if (!ticket) {
+      return res.status(404).json({
+        status: false,
+        message: "Ticket not found",
+      });
+    }
+
+    // Get current user from middleware
+    const currentUser = await User.findById(req.user.userId);
+
+    if (!currentUser) {
+      return res.status(404).json({
+        status: false,
+        message: RESPONSE_MESSAGES.USER_NOT_FOUND,
+      });
+    }
+
+    // Forward ticket to the specified department
+    // Change the department and JAG assigned
+    ticket.department = department;
+    if (JAGEmail) {
+      const user = await User.findOne({ email: JAGEmail });
+      if (user) {
+        ticket.jagAssigned = user.name;
+        ticket.jagAssignedDepartment = user.department;
+        ticket.jagEmail = user.email;
+      }
+    }
+    await ticket.save();
+
+    return res.status(200).json({
+      status: true,
+      message: "Ticket forwarded successfully and new JAG assigned",
+      data: ticket,
+    });
+  } catch (error) {
+    console.error("Error forwarding ticket:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 export const updateTicketStatus = async (req, res) => {
   try {
     const { ticketId } = req.params;
-    const { department, status } = req.body;
+    const { message, status } = req.body;
 
     // Validate if ID is a valid MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(ticketId)) {
@@ -225,11 +303,11 @@ export const updateTicketStatus = async (req, res) => {
     }
 
     // Check if at least one field is provided
-    if (!department && !status) {
+    if (!status) {
       return res.status(400).json({
         status: false,
         message:
-          "At least one field (department or status) must be provided for update",
+          "At least one field (status) must be provided for update",
       });
     }
 
@@ -241,34 +319,22 @@ export const updateTicketStatus = async (req, res) => {
       if (!VALID_STATUSES.includes(status)) {
         return res.status(400).json({
           status: false,
-          message: VALIDATION_MESSAGES.INVALID_STATUS,
+          message: VALIDATION_MESSAGE.INVALID_STATUS,
         });
       }
       updateFields.status = status;
     }
 
-    // Validate and add department if provided
-    if (department) {
-      if (!VALID_DEPARTMENTS.includes(department)) {
+    // Validate and add message if provided
+    if (message !== undefined) {
+      // Validate message length
+      if (message && message.trim().length > 1000) {
         return res.status(400).json({
           status: false,
-          message: VALIDATION_MESSAGES.INVALID_DEPARTMENT,
+          message: "Message cannot exceed 1000 characters",
         });
       }
-      updateFields.department = department;
-    }
-
-    // Validate and add messageBySIC if provided
-    if (messageBySIC !== undefined) {
-      // Validate messageBySIC length
-      if (messageBySIC && messageBySIC.trim().length > 1000) {
-        return res.status(400).json({
-          status: false,
-          message: "Message by SIC cannot exceed 1000 characters",
-        });
-      }
-
-      updateFields.messageBySIC = messageBySIC ? messageBySIC.trim() : "";
+      updateFields.message = message ? message.trim() : "";
     }
 
     // Add updatedAt timestamp
@@ -288,30 +354,16 @@ export const updateTicketStatus = async (req, res) => {
       });
     }
 
-    // Build response message based on what was updated
-    let updateMessage = "Ticket updated successfully";
-    const updatedFields = [];
-
-    if (status) updatedFields.push("status");
-    if (department) updatedFields.push("department");
-
-    if (updatedFields.length > 0) {
-      updateMessage = `Ticket ${updatedFields.join(
-        " and "
-      )} updated successfully`;
-    }
-
     return res.status(200).json({
       status: true,
-      message: updateMessage,
+      message: updateFields.message,
       data: {
         ticketId: updatedTicket._id,
         category: updatedTicket.category,
         department: updatedTicket.department,
         status: updatedTicket.status,
         employeeName: updatedTicket.employeeName,
-        updatedAt: updatedTicket.updatedAt,
-        updatedFields: updatedFields,
+        updatedAt: updatedTicket.updatedAt
       },
     });
   } catch (error) {
@@ -357,7 +409,7 @@ export const deleteTicket = async (req, res) => {
       message: RESPONSE_MESSAGES.INTERNAL_ERROR,
     });
   }
-}
+};
 
 export const getDashboardData = async (req, res) => {
   try {
@@ -367,7 +419,7 @@ export const getDashboardData = async (req, res) => {
     if (!currentUser) {
       return res.status(404).json({
         status: false,
-        message: RESPONSE_MESSAGES.USER_NOT_FOUND
+        message: RESPONSE_MESSAGES.USER_NOT_FOUND,
       });
     }
 
@@ -375,16 +427,13 @@ export const getDashboardData = async (req, res) => {
 
     // Build query based on user role
     let baseQuery = {};
-    
+
     if (currentUser.role === USER_ROLES.END_USER) {
-      baseQuery.employeeEmail = currentUser.email;
       dashboardData = await getEndUserDashboard(baseQuery, currentUser);
-    } 
-    else if (currentUser.isSIC) {
+    } else if (currentUser.isSIC) {
       baseQuery.sicEmail = currentUser.email;
       dashboardData = await getSICDashboard(baseQuery, currentUser);
-    }
-    else if (currentUser.isAdmin) {
+    } else if (currentUser.isAdmin) {
       dashboardData = await getAdminDashboard(currentUser);
     }
 
@@ -398,20 +447,18 @@ export const getDashboardData = async (req, res) => {
           role: currentUser.role,
           department: currentUser.department,
           isAdmin: currentUser.isAdmin,
+          isJAG: currentUser.isJAG,
+          isASTOfficer: currentUser.isASTOfficer,
           isSIC: currentUser.isSIC
         },
-        ...dashboardData
-      }
+        ...dashboardData,
+      },
     });
-
   } catch (error) {
     console.error(RESPONSE_MESSAGES.DASHBOARD_ERROR, error);
     return res.status(500).json({
       status: false,
-      message: RESPONSE_MESSAGES.INTERNAL_ERROR
+      message: RESPONSE_MESSAGES.INTERNAL_ERROR,
     });
   }
 };
-
-
-

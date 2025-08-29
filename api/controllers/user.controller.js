@@ -6,7 +6,7 @@ import { USER_ROLES } from "../constant/userMessage.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, department, password, role, isAdmin, isSIC } =
+    const { name, email, department, password, role, isAdmin, isSIC, isASTOfficer, isJAG } =
       req.body;
 
     // Validate required fields
@@ -17,7 +17,9 @@ export const registerUser = async (req, res) => {
       !password ||
       !role ||
       isAdmin === undefined ||
-      isSIC === undefined
+      isSIC === undefined ||
+      isASTOfficer === undefined ||
+      isJAG === undefined
     ) {
       return res
         .status(400)
@@ -39,6 +41,8 @@ export const registerUser = async (req, res) => {
       role,
       isAdmin,
       isSIC,
+      isASTOfficer,
+      isJAG
     });
 
     // Save to database

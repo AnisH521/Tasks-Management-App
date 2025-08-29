@@ -6,6 +6,7 @@ export const RESPONSE_MESSAGES = {
   USER_NOT_FOUND: "User not found",
   USER_EXISTS: "User already exists",
   SIC_NOT_FOUND: "SIC user not found",
+  JAG_NOT_FOUND: "JAG user not found",
   INVALID_EMAIL: "Invalid email format",
   REQUIRED_FIELDS: "All required fields must be provided",
   UNAUTHORIZED: "Unauthorized access",

@@ -10,13 +10,14 @@ export const protectedRoute = async (req, res, next) => {
             const decodedToken = jwt.verify(token, config.get("jwt.access_token_secret"));
 
             const resp = await User.findById(decodedToken.userId).select(
-                "email isAdmin isSIC"
+                "email isJAG isAdmin isSIC"
             );
 
             req.user = {
                 email: resp.email,
                 isAdmin: resp.isAdmin,
                 isSIC: resp.isSIC,
+                isJAG: resp.isJAG,
                 userId: decodedToken.userId
             };
 
@@ -34,6 +35,20 @@ export const isSICRoute = (req, res, next) => {
         return next();
     }
     return res.status(403).json({ message: "Forbidden: SIC access required" });
+}
+
+export const isASTOfficerRoute = (req, res, next) => {
+    if (req.user && req.user.isASTOfficer) {
+        return next();
+    }
+    return res.status(403).json({ message: "Forbidden: AST Officer access required" });
+};
+
+export const isJAGRoute = (req, res, next) => {
+    if (req.user && req.user.isJAG) {
+        return next();
+    }
+    return res.status(403).json({ message: "Forbidden: JAG access required" });
 }
 
 export const isAdminRoute = (req, res, next) => {

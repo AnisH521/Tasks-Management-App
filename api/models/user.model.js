@@ -34,6 +34,14 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    isASTOfficer: {
+      type: Boolean,
+      default: false,
+    },
+    isJAG: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

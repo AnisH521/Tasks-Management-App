@@ -17,7 +17,7 @@ const ticketSchema = new Schema(
 
     department: {
       type: String,
-      enum: ["Finance", "IT"],
+      enum: ["Finance", "IT", "Controller", "Supervisor"],
       required: true,
     },
 
@@ -52,20 +52,20 @@ const ticketSchema = new Schema(
       default: "open",
     },
 
-    // SIC handling
-    sicAssigned: {
+    // JAG handling
+    jagAssigned: {
       type: String,
       required: true,
     },
-    sicAssignedDepartment: {
+    jagAssignedDepartment: {
       type: String,
       required: false,
     },
-    sicEmail: {
+    jagEmail: {
       type: String,
       required: false,
     },
-    messageBySIC: {
+    message: {
       type: String,
       required: false,
       trim: true,
