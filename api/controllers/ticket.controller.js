@@ -2,9 +2,7 @@ import mongoose from "mongoose";
 import { Ticket } from "../models/ticket.model.js";
 import { User } from "../models/user.model.js";
 import {
-  getAdminDashboard,
   getEndUserDashboard,
-  getSICDashboard,
 } from "../services/dashboard.service.js";
 import { RESPONSE_MESSAGES } from "../constant/responseMessage.js";
 import {
@@ -267,10 +265,15 @@ export const forwardComplaint = async (req, res) => {
     ticket.department = department;
     if (JAGEmail) {
       const user = await User.findOne({ email: JAGEmail });
-      if (user) {
+      if (user && user.role === USER_ROLES.JAG) {
         ticket.jagAssigned = user.name;
         ticket.jagAssignedDepartment = user.department;
         ticket.jagEmail = user.email;
+      } else {
+        return res.status(400).json({
+          status: false,
+          message: "Invalid JAG email",
+        });
       }
     }
     await ticket.save();
@@ -427,15 +430,7 @@ export const getDashboardData = async (req, res) => {
 
     // Build query based on user role
     let baseQuery = {};
-
-    if (currentUser.role === USER_ROLES.END_USER) {
-      dashboardData = await getEndUserDashboard(baseQuery, currentUser);
-    } else if (currentUser.isSIC) {
-      baseQuery.sicEmail = currentUser.email;
-      dashboardData = await getSICDashboard(baseQuery, currentUser);
-    } else if (currentUser.isAdmin) {
-      dashboardData = await getAdminDashboard(currentUser);
-    }
+    dashboardData = await getEndUserDashboard(baseQuery, currentUser);
 
     return res.status(200).json({
       status: true,
