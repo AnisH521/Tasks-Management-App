@@ -22,7 +22,6 @@ const generateDummyUsers = async (count = 20) => {
 
     users.push({
       name: faker.person.firstName(),
-      surname: faker.person.lastName(),
       email: faker.internet.email().toLowerCase(),
       department: faker.helpers.arrayElement(departments),
       password: hashedPassword,

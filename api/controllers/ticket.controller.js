@@ -138,12 +138,7 @@ export const getComplaints = async (req, res) => {
     // SIC users see complaints that are assigned to them
     let query = {};
 
-    if (currentUser.role === USER_ROLES.END_USER) {
-      // query.employeeEmail = currentUser.email;
-      query.department = currentUser.department;
-    } else if (currentUser.isSIC) {
-      query.sicEmail = currentUser.email;
-    }
+    query.department = currentUser.department;
 
     // Apply additional filters
     if (status) query.status = status;
