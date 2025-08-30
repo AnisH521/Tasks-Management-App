@@ -79,11 +79,11 @@ cd ticket-management-system
 
 #### Tickets
 - **POST /api/v1/tickets/register**: Create new ticket
-- **GET /api/v1/tickets/my-complaints**: Get current user's tickets
-- **GET /api/v1/tickets/department-tickets**: Get department tickets (SIC/admin)
-- **GET /api/v1/tickets/all-tickets**: Get all tickets (admin only)
-- **PATCH /api/v1/tickets/:ticketId**: Update ticket (status, department, messageBySIC)
-- **GET /api/v1/tickets/dashboard**: Role-based dashboard data
+- **GET /api/v1/tickets/get-all**: Get current user's department's tickets
+- **GET /api/v1/tickets/get/:ticketId**: Get tcket info by id
+- **GET /api/v1/tickets/dashboard**: Get all tickets stats of a particular department
+- **PUT /api/v1/tickets/forward/:ticketId**: forward ticket to particular dpt
+- **PUT /api/v1/tickets/update/:ticketId**: update tcket status
 
 ## Contact
 
