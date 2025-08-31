@@ -1,25 +1,28 @@
 import mongoose from "mongoose";
 import { Ticket } from "../models/ticket.model.js";
 import { User } from "../models/user.model.js";
-import {
-  getEndUserDashboard,
-} from "../services/dashboard.service.js";
+import { getEndUserDashboard } from "../services/dashboard.service.js";
 import { RESPONSE_MESSAGES } from "../constant/responseMessage.js";
 import {
+  USER_DEPARTMENTS,
   USER_ROLES,
   VALID_DEPARTMENTS,
   VALIDATION_MESSAGES,
 } from "../constant/userMessage.js";
-import { VALID_CATEGORIES, VALID_STATUSES, VALIDATION_MESSAGE } from "../constant/ticketMessage.js";
+import {
+  VALID_CATEGORIES,
+  VALID_STATUSES,
+  VALIDATION_MESSAGE,
+} from "../constant/ticketMessage.js";
 
 // Controller to register a new ticket
 // This function handles the registration of a new ticket by an end user
 export const registerTicket = async (req, res) => {
   try {
-    const { category, complaintDescription, location, jagAssigned } = req.body;
+    const { category, complaintDescription, location } = req.body;
 
     // Validate required fields
-    if (!category || !complaintDescription || !jagAssigned || !location) {
+    if (!category || !complaintDescription || !location) {
       return res.status(400).json({
         status: false,
         message: RESPONSE_MESSAGES.REQUIRED_FIELDS,
@@ -44,36 +47,11 @@ export const registerTicket = async (req, res) => {
       });
     }
 
-    if (!VALID_DEPARTMENTS.includes(currentUser.department)) {
-      return res.status(400).json({
-        status: false,
-        message: VALIDATION_MESSAGES.INVALID_DEPARTMENT,
-      });
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(currentUser.email)) {
-      return res.status(400).json({
-        status: false,
-        message: RESPONSE_MESSAGES.INVALID_EMAIL,
-      });
-    }
-
-    // find JAG by name
-    const jagUser = await User.findOne({ name: jagAssigned, role: "JAG" });
-    if (!jagUser) {
-      return res.status(400).json({
-        status: false,
-        message: RESPONSE_MESSAGES.JAG_NOT_FOUND,
-      });
-    }
-
     // Create new ticket
     const newTicket = new Ticket({
       category,
       complaintDescription: complaintDescription.trim(),
-      department: currentUser.department,
+      department: USER_DEPARTMENTS.CONTROLLER,
       employeeName: currentUser.name,
       employeeEmail: currentUser.email,
       location: {
@@ -82,9 +60,6 @@ export const registerTicket = async (req, res) => {
         room: location?.room?.trim() || "",
       },
       status: "open",
-      jagAssigned: jagAssigned,
-      jagAssignedDepartment: jagUser.department,
-      jagEmail: jagUser.email,
     });
 
     // Save ticket to database
@@ -304,8 +279,7 @@ export const updateTicketStatus = async (req, res) => {
     if (!status) {
       return res.status(400).json({
         status: false,
-        message:
-          "At least one field (status) must be provided for update",
+        message: "At least one field (status) must be provided for update",
       });
     }
 
@@ -361,7 +335,7 @@ export const updateTicketStatus = async (req, res) => {
         department: updatedTicket.department,
         status: updatedTicket.status,
         employeeName: updatedTicket.employeeName,
-        updatedAt: updatedTicket.updatedAt
+        updatedAt: updatedTicket.updatedAt,
       },
     });
   } catch (error) {
@@ -423,8 +397,9 @@ export const getDashboardData = async (req, res) => {
 
     let dashboardData = {};
 
-    // Build query based on user role
+    // Build query based on user department
     let baseQuery = {};
+    baseQuery.department = currentUser.department;
     dashboardData = await getEndUserDashboard(baseQuery, currentUser);
 
     return res.status(200).json({
@@ -439,7 +414,7 @@ export const getDashboardData = async (req, res) => {
           isAdmin: currentUser.isAdmin,
           isJAG: currentUser.isJAG,
           isASTOfficer: currentUser.isASTOfficer,
-          isSIC: currentUser.isSIC
+          isSIC: currentUser.isSIC,
         },
         ...dashboardData,
       },

@@ -55,7 +55,7 @@ const ticketSchema = new Schema(
     // JAG handling
     jagAssigned: {
       type: String,
-      required: true,
+      required: false,
     },
     jagAssignedDepartment: {
       type: String,

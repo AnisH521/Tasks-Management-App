@@ -10,7 +10,7 @@ export const protectedRoute = async (req, res, next) => {
             const decodedToken = jwt.verify(token, config.get("jwt.access_token_secret"));
 
             const resp = await User.findById(decodedToken.userId).select(
-                "email isJAG isAdmin isSIC"
+                "email isAdmin isSIC isJAG "
             );
 
             req.user = {
