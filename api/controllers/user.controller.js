@@ -6,8 +6,17 @@ import { USER_ROLES } from "../constant/userMessage.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, department, password, role, isAdmin, isSIC, isASTOfficer, isJAG } =
-      req.body;
+    const {
+      name,
+      email,
+      department,
+      password,
+      role,
+      isAdmin,
+      isSIC,
+      isASTOfficer,
+      isJAG,
+    } = req.body;
 
     // Validate required fields
     if (
@@ -32,6 +41,25 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: RESPONSE_MESSAGES.USER_EXISTS });
     }
 
+    // check if user role and user role flag matches
+    if ((isAdmin !== true && role == USER_ROLES.ADMIN) || (isAdmin == true && role != USER_ROLES.ADMIN)) {
+      return res
+        .status(400)
+        .json({ message: RESPONSE_MESSAGES.INVALID_USER_ROLE });
+    } else if ((isSIC !== true && role == USER_ROLES.SIC) || (isSIC == true && role != USER_ROLES.SIC)) {
+      return res
+        .status(400)
+        .json({ message: RESPONSE_MESSAGES.INVALID_USER_ROLE });
+    } else if ((isASTOfficer !== true && role == USER_ROLES.ASTOFFICER) || (isASTOfficer == true && role != USER_ROLES.ASTOFFICER)) {
+      return res
+        .status(400)
+        .json({ message: RESPONSE_MESSAGES.INVALID_USER_ROLE });
+    } else if ((isJAG !== true && role == USER_ROLES.JAG) || (isJAG == true && role != USER_ROLES.JAG)) {
+      return res
+        .status(400)
+        .json({ message: RESPONSE_MESSAGES.INVALID_USER_ROLE });
+    }
+
     // Create a new user
     const newUser = new User({
       name,
@@ -42,7 +70,7 @@ export const registerUser = async (req, res) => {
       isAdmin,
       isSIC,
       isASTOfficer,
-      isJAG
+      isJAG,
     });
 
     // Save to database
@@ -53,7 +81,7 @@ export const registerUser = async (req, res) => {
 
       savedUser.password = undefined;
       return res.status(201).json({
-        message: RESPONSE_MESSAGES.COMPLAINT_REGISTERED,
+        message: RESPONSE_MESSAGES.USER_REGISTERED,
         user: savedUser,
       });
     } else {
@@ -62,7 +90,7 @@ export const registerUser = async (req, res) => {
         .json({ message: RESPONSE_MESSAGES.INTERNAL_ERROR });
     }
   } catch (error) {
-    console.error("Error registering user:", error);
+    console.error(error);
     return res.status(500).json({ message: RESPONSE_MESSAGES.INTERNAL_ERROR });
   }
 };

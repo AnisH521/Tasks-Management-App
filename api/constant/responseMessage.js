@@ -16,4 +16,6 @@ export const RESPONSE_MESSAGES = {
   TICKET_CREATED: "Ticket created successfully",
   TICKET_UPDATED: "Ticket updated successfully",
   INVALID_ID_FORMAT: "Invalid ID format",
+  INVALID_USER_ROLE: "Invalid user role",
+  USER_REGISTERED: "User registered successfully",
 };
