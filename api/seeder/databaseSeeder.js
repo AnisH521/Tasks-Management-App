@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
 import { USER_ROLES, VALID_ROLES } from '../constant/userMessage.js';
@@ -6,9 +5,9 @@ import { User } from '../models/user.model.js';
 import { Ticket } from '../models/ticket.model.js';
 
 // Sample data templates
-const departments = ["Finance", "IT"];  // From Ticket model enum
-const categories = ["Safety", "Non-Safety", "Asset-Failure"];  // From Ticket model enum
-const statuses = ["open", "forwarded", "closed", "rejected"];  // From Ticket model enum
+const departments = ["Finance", "IT"];  
+const categories = ["Safety", "Non-Safety", "Asset-Failure"];  
+const statuses = ["open", "forwarded", "closed", "rejected"];  
 
 // Function to generate dummy users
 const generateDummyUsers = async (count = 20) => {
@@ -17,17 +16,21 @@ const generateDummyUsers = async (count = 20) => {
     const role = faker.helpers.arrayElement(VALID_ROLES);
     const isAdmin = role === USER_ROLES.ADMIN ? true : false;
     const isSIC = role === USER_ROLES.SIC ? true : false;
+    const isASTOfficer = role === USER_ROLES.ASTOFFICER ? true : false;
+    const isJAG = role === USER_ROLES.JAG ? true : false;
     const password = "SecurePassword123";  // Default password for all users
     const hashedPassword = await bcrypt.hash(password, 10);
 
     users.push({
-      name: faker.person.firstName(),
+      name: faker.person.fullName(),
       email: faker.internet.email().toLowerCase(),
       department: faker.helpers.arrayElement(departments),
       password: hashedPassword,
       role,
       isAdmin,
-      isSIC
+      isSIC,
+      isASTOfficer,
+      isJAG
     });
   }
   return users;
@@ -38,7 +41,7 @@ const generateDummyTickets = (users, count = 50) => {
   const tickets = [];
   for (let i = 0; i < count; i++) {
     const randomUser = faker.helpers.arrayElement(users.filter(u => u.role === USER_ROLES.END_USER));  // End users create tickets
-    const randomSIC = faker.helpers.arrayElement(users.filter(u => u.isSIC));  // SIC for assignment
+    const randomJAG = faker.helpers.arrayElement(users.filter(u => u.isJAG));
 
     tickets.push({
       category: faker.helpers.arrayElement(categories),
@@ -52,10 +55,10 @@ const generateDummyTickets = (users, count = 50) => {
         room: `Room ${faker.number.int({ min: 100, max: 999 })}`
       },
       status: faker.helpers.arrayElement(statuses),
-      sicAssigned: `${randomSIC.name} ${randomSIC.surname}`,  // String as per your model
-      sicAssignedDepartment: randomSIC.department,
-      sicEmail: randomSIC.email,  // Assuming this is for reference
-      messageBySIC: faker.datatype.boolean() ? faker.lorem.sentence() : null
+      jagAssigned: `${randomJAG.name}`,  // String as per your model
+      jagAssignedDepartment: randomJAG.department,
+      jagEmail: randomJAG.email,  // Assuming this is for reference
+      message: faker.datatype.boolean() ? faker.lorem.sentence() : null
     });
   }
   return tickets;
