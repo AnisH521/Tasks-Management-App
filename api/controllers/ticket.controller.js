@@ -194,6 +194,13 @@ export const forwardComplaint = async (req, res) => {
     const { ticketId } = req.params;
     const { department, JAGEmail } = req.body;
 
+    if (!JAGEmail || !department) {
+      return res.status(400).json({
+        status: false,
+        message: "JAG email and department are required",
+      });
+    }
+
     // Validate if ID is a valid MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(ticketId)) {
       return res.status(400).json({
@@ -210,7 +217,7 @@ export const forwardComplaint = async (req, res) => {
       });
     }
 
-    // Find ticket by ID
+    // Find ticket by ID and check existence
     const ticket = await Ticket.findById(ticketId);
 
     if (!ticket) {
@@ -220,7 +227,7 @@ export const forwardComplaint = async (req, res) => {
       });
     }
 
-    // Get current user from middleware
+    // Get current user from middleware  and check existence
     const currentUser = await User.findById(req.user.userId);
 
     if (!currentUser) {
@@ -230,19 +237,21 @@ export const forwardComplaint = async (req, res) => {
       });
     }
 
+    // check if JAG email is provided
+    // check if user is JAG and provided department is same as jag department
     // Forward ticket to the specified department
     // Change the department and JAG assigned
-    ticket.department = department;
     if (JAGEmail) {
       const user = await User.findOne({ email: JAGEmail });
-      if (user && user.role === USER_ROLES.JAG) {
+      if (user && user.role === USER_ROLES.JAG && user.department === department) {
         ticket.jagAssigned = user.name;
         ticket.jagAssignedDepartment = user.department;
         ticket.jagEmail = user.email;
+        ticket.department = department;
       } else {
         return res.status(400).json({
           status: false,
-          message: "Invalid JAG email",
+          message: "Invalid data provided",
         });
       }
     }
