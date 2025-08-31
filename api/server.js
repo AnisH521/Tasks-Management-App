@@ -30,6 +30,7 @@ app.use(
   cors({
     origin: config.get("cors.allowedOrigins"),
     methods: config.get("method"),
+    allowedHeaders: config.get("headers"),
     credentials: true,
   })
 );
