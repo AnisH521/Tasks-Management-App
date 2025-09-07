@@ -1,0 +1,161 @@
+/* Issue Container */
+.issue-container {
+
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  color: #333;
+  background-color: #f9f9f9;
+  
+  /* Add this to avoid going behind sidebar */
+  margin-left: 200px; 
+  margin-top: 80px; /* height of navbar if fixed */
+  min-height: calc(100vh - 80px); /* full page minus navbar */
+}
+
+
+/* Headings */
+.issue-container h2 {
+  color: #004080;
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Filter & Search Bar */
+.filter-search-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Filter Box */
+.filter-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.filter-box:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  border-color: #004080;
+}
+
+.filter-box select {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Search Box */
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-box input {
+  padding: 8px 12px 8px 35px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 200px;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-box input:focus {
+  border-color: #004080;
+  box-shadow: 0 0 5px rgba(0, 64, 128, 0.3);
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  font-size: 16px;
+  color: #888;
+}
+
+/* Table Wrapper */
+.table-wrapper {
+  max-height: 450px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+/* Issue Table */
+.issue-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px; /* prevents table from collapsing on small screens */
+}
+
+.issue-table th, .issue-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+  font-size: 14px;
+}
+
+.issue-table th {
+  background-color: #004080;
+  color: #fff;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.issue-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Status Colors */
+.status-open {
+  color: green;
+  font-weight: bold;
+}
+
+.status-closed {
+  color: red;
+  font-weight: bold;
+}
+
+.status-forwarded {
+  color: darkgoldenrod;
+  font-weight: bold;
+}
+
+.status-rejected {
+  color: black;
+  font-weight: bold;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .filter-search-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .search-box input {
+    width: 100%;
+  }
+
+  .issue-table {
+    font-size: 13px;
+  }
+}

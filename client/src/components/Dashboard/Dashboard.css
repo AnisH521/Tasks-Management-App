@@ -1,0 +1,19 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden; /* Prevent whole page scrolling */
+}
+
+.dashboard-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden; /* Keep content inside */
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto; /* Scroll only inside content */
+  background-color: #f9f9f9;
+}
