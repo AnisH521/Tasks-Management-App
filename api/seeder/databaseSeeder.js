@@ -5,7 +5,7 @@ import { User } from '../models/user.model.js';
 import { Ticket } from '../models/ticket.model.js';
 
 // Sample data templates
-const departments = ["Finance", "IT"];  
+const departments = ["Finance", "IT", "Controller", "Supervisor"];  
 const categories = ["Safety", "Non-Safety", "Asset-Failure"];  
 const statuses = ["open", "forwarded", "closed", "rejected"];  
 

@@ -1,19 +1,27 @@
+// src/App.js
 import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import Login from "./components/Login/Login";
 import Dashboard from "./components/Dashboard/Dashboard";
+import PrivateRoute from "./components/PrivateRoute/PrivateRoute"; // Import here
 
 function App() {
   return (
     <>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
       </Routes>
 
-      {/* Toast notifications container with margin-top */}
       <ToastContainer
         position="top-right"
         autoClose={5000}

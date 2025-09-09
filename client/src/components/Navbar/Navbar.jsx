@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { FaUserCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom"; // For navigation
 import "./Navbar.css";
 import Logo from "../../assets/logo.png";
 
 function Navbar() {
   const [isHovered, setIsHovered] = useState(false);
   const [user, setUser] = useState(null);
+  const navigate = useNavigate(); // useNavigate for redirection
 
   useEffect(() => {
     const storedUser = localStorage.getItem("userInfo");
@@ -13,6 +15,15 @@ function Navbar() {
       setUser(JSON.parse(storedUser));
     }
   }, []);
+
+  const handleLogout = () => {
+    // Clear user data and other tokens if stored
+    localStorage.removeItem("userInfo");
+    // Optionally clear other data, cookies, etc. here
+
+    // Redirect to login page
+    navigate("/");
+  };
 
   return (
     <div className="navbar">
@@ -35,11 +46,15 @@ function Navbar() {
         {isHovered && user && (
           <div className="user-tooltip">
             <p>
-              <strong>{user.name}</strong>
+              <strong>Name: {user.name}</strong>
             </p>
-            <p>{user.email}</p>
-            <p>{user.department}</p>
-            <p>{user.role}</p>
+            <p>Email: {user.email}</p>
+            <p>Department: {user.department}</p>
+            <p>Role: {user.role}</p>
+            <hr />
+            <button onClick={handleLogout} className="logout-button">
+              Logout
+            </button>
           </div>
         )}
       </div>

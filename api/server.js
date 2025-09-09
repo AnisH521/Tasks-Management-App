@@ -14,7 +14,7 @@ import { seedDatabase } from "./seeder/databaseSeeder.js";
 dotenv.config();
 
 connectDB();
-// await seedDatabase();
+//await seedDatabase();
 
 // Define the port from environment variables or default to 4000
 // This allows the server to run on a specified port, useful for deployment or local development

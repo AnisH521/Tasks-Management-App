@@ -2,15 +2,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 100px; /* fixed height */
+  height: 80px;
   padding: 0 20px;
   background: linear-gradient(45deg, #ff9933, #ffffff, #138808);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
+  transition: background 0.3s ease;
 }
 
 .navbar-left {
@@ -19,39 +20,90 @@
 }
 
 .logo {
-  height: 60px;
+  height: 50px;
+  transition: transform 0.2s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
 }
 
 .navbar-center {
   flex-grow: 1;
   text-align: center;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: bold;
-  color: #000;
+  color: #222;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .navbar-right {
   position: relative;
   display: flex;
   align-items: center;
-  color: #000;
+  color: #222;
   cursor: pointer;
 }
 
-.user-details-dropdown {
+.user-tooltip {
   position: absolute;
-  top: 100%;
+  top: 110%;
   right: 0;
-  background: white;
-  border: 1px solid #ccc;
-  padding: 10px;
-  width: 200px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  z-index: 1000;
+  background: #fff;
+  border-radius: 8px;
+  padding: 15px;
+  width: 270px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
 }
 
-.user-details-dropdown p {
-  margin: 5px 0;
+.navbar-right:hover .user-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.user-tooltip p {
+  margin: 8px 0;
   font-size: 14px;
   color: #333;
+}
+
+.user-tooltip hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 10px 0;
+}
+
+.logout-button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  width: 100%;
+  border-radius: 4px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #c0392b;
+}
+
+/* Responsive for smaller screens */
+@media (max-width: 768px) {
+  .navbar-center {
+    font-size: 18px;
+  }
+  .user-tooltip {
+    width: 180px;
+    padding: 10px;
+  }
+  .logout-button {
+    padding: 8px;
+  }
 }

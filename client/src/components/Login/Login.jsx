@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Import for navigation
 import "./Login.css";
 import logo from "../../assets/logo.png";
 
@@ -6,6 +7,15 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate(); // Initialize navigate
+
+  // Redirect to dashboard if user is already logged in
+  useEffect(() => {
+    const user = localStorage.getItem("userInfo");
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,7 +37,11 @@ function Login() {
       const data = await res.json();
       console.log("✅ Login success:", data);
 
-      window.location.href = "/dashboard";
+      // Save user info in localStorage
+      localStorage.setItem("userInfo", JSON.stringify(data));
+
+      // Redirect to dashboard
+      navigate("/dashboard");
     } catch (err) {
       console.error("❌ Error during login:", err);
       setError("Login failed. Please check your credentials.");
