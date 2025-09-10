@@ -1,10 +1,10 @@
 {
-    "app": {
-        "port": 3000
-    },
-    "db": {},
-    "jwt": {
-        "access_token_expires_in": "15m",
-        "refresh_token_expires_in": "7d"
-    }
+  "app": {
+    "port": 5000
+  },
+  "db": {},
+  "jwt": {
+    "access_token_expires_in": "15m",
+    "refresh_token_expires_in": "7d"
+  }
 }
