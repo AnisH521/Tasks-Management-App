@@ -26,7 +26,7 @@ function IssueList() {
         if (categoryFilter !== "all") bodyData.category = categoryFilter;
 
         const response = await fetch(
-          "http://localhost:3000/api/v1/tickets/get-all",
+          "http://31.97.224.226:5000/api/v1/tickets/get-all",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

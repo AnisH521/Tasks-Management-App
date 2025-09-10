@@ -18,7 +18,7 @@ function Monitor() {
   const fetchDashboard = async () => {
     try {
       const res = await fetch(
-        "http://localhost:3000/api/v1/tickets/dashboard",
+        "http://31.97.224.226:5000/api/v1/tickets/dashboard",
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
