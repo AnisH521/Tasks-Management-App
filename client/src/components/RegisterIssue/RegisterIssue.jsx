@@ -41,7 +41,7 @@ function RegisterIssue() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/v1/tickets/register`,
+        `http://31.97.224.226:5000/api/v1/tickets/register`,
         {
           method: "POST",
           headers: {
