@@ -2,6 +2,7 @@ import express from "express";
 import {
   deleteUser,
   getAllEndUsers,
+  getAllJAG,
   getAllSIC,
   getUserById,
   loginUser,
@@ -24,6 +25,7 @@ userRouter
   .get(protectedRoute, isAdminRoute, getAllEndUsers);
 
 userRouter.route("/getSICUsers").get(protectedRoute, isAdminRoute, getAllSIC);
+userRouter.route("/getJAGUsers").get(protectedRoute, getAllJAG);
 
 userRouter.route("/:id").get(protectedRoute, isAdminRoute, getUserById);
 

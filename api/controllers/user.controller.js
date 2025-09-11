@@ -42,19 +42,31 @@ export const registerUser = async (req, res) => {
     }
 
     // check if user role and user role flag matches
-    if ((isAdmin !== true && role == USER_ROLES.ADMIN) || (isAdmin == true && role != USER_ROLES.ADMIN)) {
+    if (
+      (isAdmin !== true && role == USER_ROLES.ADMIN) ||
+      (isAdmin == true && role != USER_ROLES.ADMIN)
+    ) {
       return res
         .status(400)
         .json({ message: RESPONSE_MESSAGES.INVALID_USER_ROLE });
-    } else if ((isSIC !== true && role == USER_ROLES.SIC) || (isSIC == true && role != USER_ROLES.SIC)) {
+    } else if (
+      (isSIC !== true && role == USER_ROLES.SIC) ||
+      (isSIC == true && role != USER_ROLES.SIC)
+    ) {
       return res
         .status(400)
         .json({ message: RESPONSE_MESSAGES.INVALID_USER_ROLE });
-    } else if ((isASTOfficer !== true && role == USER_ROLES.ASTOFFICER) || (isASTOfficer == true && role != USER_ROLES.ASTOFFICER)) {
+    } else if (
+      (isASTOfficer !== true && role == USER_ROLES.ASTOFFICER) ||
+      (isASTOfficer == true && role != USER_ROLES.ASTOFFICER)
+    ) {
       return res
         .status(400)
         .json({ message: RESPONSE_MESSAGES.INVALID_USER_ROLE });
-    } else if ((isJAG !== true && role == USER_ROLES.JAG) || (isJAG == true && role != USER_ROLES.JAG)) {
+    } else if (
+      (isJAG !== true && role == USER_ROLES.JAG) ||
+      (isJAG == true && role != USER_ROLES.JAG)
+    ) {
       return res
         .status(400)
         .json({ message: RESPONSE_MESSAGES.INVALID_USER_ROLE });
@@ -216,6 +228,43 @@ export const getAllSIC = async (req, res) => {
       message: RESPONSE_MESSAGES.SUCCESS,
       count: sicUsers.length,
       data: sicUsers,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: RESPONSE_MESSAGES.INTERNAL_ERROR,
+    });
+  }
+};
+
+export const getAllJAG = async (req, res) => {
+  try {
+    const { department } = req.body;
+
+    if (!department) {
+      return res.status(400).json({
+        status: false,
+        message: RESPONSE_MESSAGES.REQUIRED_FIELDS,
+      });
+    }
+    // Find all users with role 'JAG' and exclude sensitive fields
+    const jagUsers = await User.find({
+      role: USER_ROLES.JAG,
+      department: department,
+    }).select("-password -__v");
+
+    if (!jagUsers || jagUsers.length === 0) {
+      return res.status(404).json({
+        status: false,
+        message: RESPONSE_MESSAGES.JAG_NOT_FOUND,
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: RESPONSE_MESSAGES.SUCCESS,
+      count: jagUsers.length,
+      data: jagUsers,
     });
   } catch (error) {
     return res.status(500).json({
