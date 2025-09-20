@@ -73,7 +73,7 @@ function IssueDetails() {
       if (!res.ok) throw new Error(data.message || "Failed to forward ticket");
 
       toast.success("Status updated successfully");
-      navigate("/monitor/issues"); // ✅ redirect after success
+      navigate("/monitor/issues"); // redirect after success
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -103,7 +103,7 @@ function IssueDetails() {
       if (!res.ok) throw new Error(data.message || "Failed to update ticket");
 
       toast.success("Status updated successfully");
-      navigate("/monitor/issues"); // ✅ redirect after success
+      navigate("/monitor/issues"); //redirect after success
     } catch (err) {
       toast.error(err.message);
     } finally {
