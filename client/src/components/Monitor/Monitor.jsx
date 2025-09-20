@@ -10,6 +10,7 @@ import {
   Cell,
 } from "recharts";
 import "./Monitor.css";
+import { API_BASE_URL } from "../../config";
 
 function Monitor() {
   const [dashboard, setDashboard] = useState(null);
@@ -17,18 +18,15 @@ function Monitor() {
 
   const fetchDashboard = async () => {
     try {
-      const res = await fetch(
-        "http://localhost:5000/api/v1/tickets/dashboard",
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/api/v1/tickets/dashboard`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
 
       if (res.ok) {
         const data = await res.json();
-        console.log("✅ Dashboard data:", data);
+        // console.log("✅ Dashboard data:", data);
         setDashboard(data);
         setError("");
       } else {
@@ -71,7 +69,7 @@ function Monitor() {
 
   return (
     <div className="monitor-container">
-      <h2>Dashboard Monitor</h2>
+      <h1>Dashboard Monitor</h1>
 
       {error && <p style={{ color: "red" }}>❌ {error}</p>}
 

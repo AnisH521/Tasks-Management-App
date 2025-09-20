@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Import for navigation
 import "./Login.css";
 import logo from "../../assets/logo.png";
+import { API_BASE_URL } from "../../config";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -13,7 +14,7 @@ function Login() {
   useEffect(() => {
     const user = localStorage.getItem("userInfo");
     if (user) {
-      navigate("/dashboard");
+      navigate("/monitor");
     }
   }, [navigate]);
 
@@ -21,7 +22,7 @@ function Login() {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://31.97.224.226:5000/api/v1/users/login", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/users/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -41,7 +42,7 @@ function Login() {
       localStorage.setItem("userInfo", JSON.stringify(data));
 
       // Redirect to dashboard
-      navigate("/dashboard");
+      navigate("/monitor");
     } catch (err) {
       console.error("❌ Error during login:", err);
       setError("Login failed. Please check your credentials.");

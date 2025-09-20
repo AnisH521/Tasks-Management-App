@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import "./RegisterIssue.css";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify"; // Import ToastContainer
+import "react-toastify/dist/ReactToastify.css";
+import { API_BASE_URL } from "../../config";
+import { useNavigate } from "react-router-dom";
 
 function RegisterIssue() {
   const [category, setCategory] = useState("Safety");
@@ -8,13 +11,14 @@ function RegisterIssue() {
   const [building, setBuilding] = useState("");
   const [floor, setFloor] = useState("");
   const [room, setRoom] = useState("");
-  const [jagAssigned, setJagAssigned] = useState("");
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
+
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    const newImages = files.slice(0, 4 - images.length); // limit to max 4
+    const newImages = files.slice(0, 4 - images.length);
     const imagePreviews = newImages.map((file) => URL.createObjectURL(file));
     setImages([...images, ...imagePreviews]);
   };
@@ -36,38 +40,36 @@ function RegisterIssue() {
         floor,
         room,
       },
-      jagAssigned,
+      jagAssigned: "", // blank
     };
 
     try {
-      const response = await fetch(
-        `http://31.97.224.226:5000/api/v1/tickets/register`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/v1/tickets/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
 
       const data = await response.json();
 
       if (data.status) {
-        toast.success(
-          `Success: ${data.message}\nTicket ID: ${data.data.ticketId}`
-        );
-        console.log("Registered Ticket ID:", data.data.ticketId);
+        toast.success("Registered successfully.");
 
-        // Clear form
+        // Reset form
         setCategory("Safety");
         setComplaintDescription("");
         setBuilding("");
         setFloor("");
         setRoom("");
-        setJagAssigned("");
         setImages([]);
+
+        // redirect
+        setTimeout(() => {
+          navigate("/monitor/issues");
+        }, 1500);
       } else {
         toast.error(`Error: ${data.message || "Something went wrong"}`);
       }
@@ -96,27 +98,25 @@ function RegisterIssue() {
             <option value="Asset-Failure">Asset-Failure</option>
             <option value="Non-Safety">Non-Safety</option>
           </select>
+
           {/* Location */}
           <div className="form-group location-group">
             <label>Location</label>
             <input
               type="text"
               placeholder="Building"
-              name="building"
               value={building}
               onChange={(e) => setBuilding(e.target.value)}
             />
             <input
               type="text"
               placeholder="Floor"
-              name="floor"
               value={floor}
               onChange={(e) => setFloor(e.target.value)}
             />
             <input
               type="text"
               placeholder="Room"
-              name="room"
               value={room}
               onChange={(e) => setRoom(e.target.value)}
             />
@@ -128,24 +128,11 @@ function RegisterIssue() {
           <label htmlFor="description">Complaint Description</label>
           <textarea
             id="description"
-            name="complaintDescription"
             rows="4"
             placeholder="Describe the issue..."
             value={complaintDescription}
             onChange={(e) => setComplaintDescription(e.target.value)}
           ></textarea>
-        </div>
-
-        {/* JAG Assigned */}
-        <div className="form-group">
-          <label htmlFor="jagAssigned">JAG Assigned</label>
-          <input
-            type="text"
-            id="jagAssigned"
-            name="jagAssigned"
-            value={jagAssigned}
-            onChange={(e) => setJagAssigned(e.target.value)}
-          />
         </div>
 
         {/* Image Upload */}
@@ -180,11 +167,18 @@ function RegisterIssue() {
           </div>
         </div>
 
-        {/* Submit Button */}
+        {/* Submit Button with Loader */}
         <button type="submit" className="submit-btn" disabled={loading}>
-          {loading ? "Submitting..." : "Submit"}
+          {loading ? (
+            <span className="loader"></span> // loader spinner
+          ) : (
+            "Submit"
+          )}
         </button>
       </form>
+
+      {/* Add ToastContainer here */}
+      <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );
 }
