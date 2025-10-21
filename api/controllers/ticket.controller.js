@@ -55,9 +55,9 @@ export const registerTicket = async (req, res) => {
       employeeName: currentUser.name,
       employeeEmail: currentUser.email,
       location: {
-        building: location?.building?.trim() || "",
-        floor: location?.floor?.trim() || "",
-        room: location?.room?.trim() || "",
+        section: location?.section?.trim() || "",
+        address: location?.address?.trim() || "",
+        landmark: location?.landmark?.trim() || "",
       },
       status: "open",
     });
@@ -243,7 +243,11 @@ export const forwardComplaint = async (req, res) => {
     // Change the department and JAG assigned
     if (JAGEmail) {
       const user = await User.findOne({ email: JAGEmail });
-      if (user && user.role === USER_ROLES.JAG && user.department === department) {
+      if (
+        user &&
+        user.role === USER_ROLES.JAG &&
+        user.department === department
+      ) {
         ticket.jagAssigned = user.name;
         ticket.jagAssignedDepartment = user.department;
         ticket.jagEmail = user.email;
@@ -352,6 +356,63 @@ export const updateTicketStatus = async (req, res) => {
     return res.status(500).json({
       status: false,
       message: RESPONSE_MESSAGES.INTERNAL_ERROR,
+    });
+  }
+};
+
+// Controller to add a reply/chat message to a ticket
+export const addReplyToTicket = async (req, res) => {
+  try {
+    const { ticketId, sender, message, senderRole } = req.body;
+
+    // Validate required fields
+    if (!ticketId) {
+      return res.status(400).json({
+        status: false,
+        message: "Ticket ID is required",
+      });
+    }
+
+    if (!sender || !message || !senderRole) {
+      return res.status(400).json({
+        status: false,
+        message: "Sender, message, and senderRole are required",
+      });
+    }
+
+    // Find the ticket
+    const ticket = await Ticket.findById(ticketId);
+
+    if (!ticket) {
+      return res.status(404).json({
+        status: false,
+        message: "Ticket not found",
+      });
+    }
+
+    // Create a new reply
+    const newReply = {
+      sender,
+      message,
+      senderRole,
+      timestamp: new Date(),
+    };
+
+    ticket.replies.push(newReply);
+
+    await ticket.save();
+
+    return res.status(200).json({
+      status: true,
+      message: "Reply added successfully",
+      data: newReply,
+    });
+  } catch (error) {
+    console.error("Error adding reply:", error);
+
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
     });
   }
 };
