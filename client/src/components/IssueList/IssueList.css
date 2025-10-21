@@ -1,17 +1,14 @@
 /* Issue Container */
 .issue-container {
-
   padding: 20px;
   font-family: Arial, sans-serif;
   color: #333;
   background-color: #f9f9f9;
-  
-  /* Add this to avoid going behind sidebar */
-  margin-left: 200px; 
-  margin-top: 80px; /* height of navbar if fixed */
-  min-height: calc(100vh - 80px); /* full page minus navbar */
+  margin-left: 200px; /* for sidebar */
+  margin-top: 80px; /* height of navbar */
+  min-height: calc(100vh - 80px);
+  box-sizing: border-box;
 }
-
 
 /* Headings */
 .issue-container h2 {
@@ -24,10 +21,9 @@
 /* Filter & Search Bar */
 .filter-search-bar {
   display: flex;
-   
+  flex-wrap: wrap;
   align-items: center;
   margin-bottom: 20px;
-  flex-wrap: wrap;
   gap: 10px;
 }
 
@@ -88,8 +84,9 @@
 
 /* Table Wrapper */
 .table-wrapper {
+  width: 100%;
+  overflow-x: auto;
   max-height: 450px;
-  overflow-y: auto;
   border: 1px solid #ddd;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -100,10 +97,11 @@
 .issue-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px; /* prevents table from collapsing on small screens */
+  min-width: 600px;
 }
 
-.issue-table th, .issue-table td {
+.issue-table th,
+.issue-table td {
   border: 1px solid #ddd;
   padding: 10px;
   text-align: left;
@@ -144,21 +142,7 @@
   font-weight: bold;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .filter-search-bar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .search-box input {
-    width: 100%;
-  }
-
-  .issue-table {
-    font-size: 13px;
-  }
-}
+/* Modal Overlay */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -171,18 +155,21 @@
   align-items: center;
   z-index: 1000;
   animation: fadeIn 0.3s ease;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
+/* Modal Content */
 .modal-content {
   background: #ffffff;
-  padding: 40px 50px;
+  padding: 30px 40px;
   border-radius: 12px;
-  width: 90%;
-  max-width: 900px; /* increased max width */
-  max-height: 90%;   /* increased max height */
+  width: 100%;
+  max-width: 800px;
+  max-height: 90%;
   overflow-y: auto;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
-  border: 4px solid #004080; /* thicker and more prominent border */
+  border: 4px solid #004080;
   position: relative;
   animation: slideIn 0.4s ease;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -190,41 +177,43 @@
 
 .modal-content h3 {
   margin-top: 0;
-  font-size: 2rem;
+  font-size: 1.8rem;
   color: #004080;
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
+/* Form Group */
 .form-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .form-group label {
   font-weight: bold;
   color: #004080;
-  margin-bottom: 8px;
-  font-size: 1.1rem;
+  margin-bottom: 6px;
+  font-size: 1rem;
 }
 
 .form-group p {
   background: #f9f9f9;
-  padding: 12px;
+  padding: 10px;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 6px;
   color: #333;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
+/* Close Button */
 .close-button {
   position: absolute;
-  top: 20px;
-  right: 25px;
+  top: 15px;
+  right: 20px;
   border: none;
   background: transparent;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   cursor: pointer;
   color: #888;
   transition: color 0.2s ease;
@@ -232,6 +221,19 @@
 
 .close-button:hover {
   color: #ff0000;
+}
+
+/* Forward Button */
+.forward-button {
+  background-color: #4dd125ff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 /* Scrollbar Styling */
@@ -257,4 +259,90 @@
 @keyframes slideIn {
   from { transform: translateY(-20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsive Adjustments */
+
+/* Medium screens */
+@media (max-width: 1200px) {
+  .issue-container {
+    margin-left: 0;
+    padding: 20px;
+  }
+}
+
+/* Tablets */
+@media (max-width: 992px) {
+  .filter-search-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .issue-table {
+    font-size: 13px;
+    min-width: 500px;
+  }
+
+  .modal-content {
+    margin-top: 30px;
+    padding: 25px 30px;
+    max-width: 700px;
+  }
+}
+
+/* Small devices */
+@media (max-width: 768px) {
+  .search-box input {
+    width: 100%;
+  }
+
+  .issue-table {
+    font-size: 12px;
+    min-width: 100%;
+  }
+
+  .modal-content {
+    margin-top: 30px;
+    padding: 20px 25px;
+    max-width: 90%;
+  }
+
+  .form-group p {
+    font-size: 0.9rem;
+  }
+
+  .modal-content h3 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .issue-table th,
+  .issue-table td {
+    padding: 6px 8px;
+  }
+
+  .modal-content {
+    margin-top: 30px;
+    padding: 15px 20px;
+  }
+
+  .form-group p {
+    font-size: 0.85rem;
+  }
+
+  .modal-content h3 {
+    font-size: 1.3rem;
+  }
+
+  .close-button {
+    font-size: 1.3rem;
+  }
+
+  .forward-button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
 }

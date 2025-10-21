@@ -4,7 +4,7 @@
   justify-content: space-between;
   height: 80px;
   padding: 0 20px;
-  background: linear-gradient(45deg, #ff9933, #ffffff, #138808);
+  background: #d4f1f4;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   position: fixed;
   top: 0;
@@ -12,6 +12,8 @@
   right: 0;
   z-index: 1000;
   transition: background 0.3s ease;
+  border-bottom: 2px solid #102035;
+  border-top: 2px solid #102035;
 }
 
 .navbar-left {
@@ -54,17 +56,16 @@
   padding: 15px;
   width: 270px;
   box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-10px);
-  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.navbar-right:hover .user-tooltip {
+
+/* .navbar-right:hover .user-tooltip {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
-}
+} */
+
 
 .user-tooltip p {
   margin: 8px 0;
@@ -96,9 +97,14 @@
 
 /* Responsive for smaller screens */
 @media (max-width: 768px) {
+  
   .navbar-center {
     font-size: 18px;
+    display: none;
   }
+ .navbar-right{
+  margin-right: 60px;
+ }
   .user-tooltip {
     width: 180px;
     padding: 10px;

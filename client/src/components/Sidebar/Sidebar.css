@@ -1,15 +1,30 @@
+/* Sidebar default styling */
 .sidebar {
   width: 200px;
-  height: calc(100vh - 80px);  
+  height: calc(100vh - 80px);
   background: #071545;
   color: white;
   padding-top: 20px;
   position: fixed;
-  top: 80px;  
+  top: 80px;
   left: 0;
-  overflow-y: auto;  
+  overflow-y: auto;
+  transition: transform 0.3s ease;
 }
 
+/* Hide sidebar by default on small screens */
+@media (max-width: 992px) {
+  .sidebar {
+    transform: translateX(-100%);
+    z-index: 1000;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+/* Sidebar list styles */
 .sidebar ul {
   list-style: none;
   padding: 0;
@@ -28,4 +43,26 @@
   background: #ebebec;
   color: #000;
   font-weight: bold;
+}
+
+/* Hamburger styling */
+.hamburger {
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1100;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.hamburger:hover {
+  background: #3949ab;
+}
+
+@media (max-width: 992px) {
+  .hamburger {
+    display: block;
+  }
 }

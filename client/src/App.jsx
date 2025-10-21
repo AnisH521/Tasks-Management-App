@@ -1,19 +1,21 @@
-// src/App.js
 import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 import Login from "./components/Login/Login";
 import Dashboard from "./components/Dashboard/Dashboard";
-import PrivateRoute from "./components/PrivateRoute/PrivateRoute"; // Import here
+import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
 
 function App() {
   return (
     <>
       <Routes>
         <Route path="/" element={<Login />} />
+
+        {/* Protected Routes */}
         <Route
-          path="/dashboard"
+          path="/monitor/*"
           element={
             <PrivateRoute>
               <Dashboard />
