@@ -1,5 +1,29 @@
 import mongoose, { Schema } from "mongoose";
 
+const replySchema = new Schema(
+  {
+    sender: {
+      type: String,
+      required: true,
+    },
+    message: {
+      type: String,
+      required: true,
+      trim: true,
+      maxLength: 1000,
+    },
+    senderRole: {
+      type: String,
+      required: true,
+    },
+    timestamp: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { _id: false }
+);
+
 const ticketSchema = new Schema(
   {
     category: {
@@ -32,15 +56,15 @@ const ticketSchema = new Schema(
     },
 
     location: {
-      building: {
+      section: {
         type: String,
         required: false,
       },
-      floor: {
+      address: {
         type: String,
         required: false,
       },
-      room: {
+      landmark: {
         type: String,
         required: false,
       },
@@ -70,6 +94,10 @@ const ticketSchema = new Schema(
       required: false,
       trim: true,
       maxLength: 1000,
+    },
+    replies: {
+      type: [replySchema],
+      default: [],
     },
   },
   {

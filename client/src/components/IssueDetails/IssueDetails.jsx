@@ -81,8 +81,8 @@ function IssueDetails() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to forward ticket");
 
-      toast.success("Ticket forwarded successfully");
-      navigate("/monitor/issues");
+      toast.success("Status updated successfully");
+      navigate("/monitor/issues"); // ✅ redirect after success
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -110,8 +110,8 @@ function IssueDetails() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to close ticket");
 
-      toast.success("Ticket closed successfully");
-      navigate("/monitor/issues");
+      toast.success("Status updated successfully");
+      navigate("/monitor/issues"); // ✅ redirect after success
     } catch (err) {
       toast.error(err.message);
     } finally {
