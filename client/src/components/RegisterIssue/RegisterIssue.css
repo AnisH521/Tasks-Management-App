@@ -2,12 +2,12 @@
   max-width: 900px;
   margin: 50px auto;
   margin-top: 100px;
-  padding: 30px 40px; /* more padding for rectangle look */
-  border: 5px solid #071545; /* thicker border for rectangle */
-  border-radius: 12px; /* slightly rounded corners */
-  background-color: #ffffff; /* white background for rectangle */
+  padding: 30px 40px;
+  border: 5px solid #071545;
+  border-radius: 12px;
+  background-color: #ffffff;
   font-family: Arial, sans-serif;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* subtle shadow for depth */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .register-issue-container h2 {
@@ -15,6 +15,8 @@
   margin-bottom: 25px;
   color: #071545;
   font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .issue-form .form-group {
@@ -26,7 +28,7 @@
 .issue-form label {
   margin-bottom: 8px;
   font-weight: bold;
-  color: #555;
+  color: #333;
 }
 
 .issue-form input,
@@ -36,20 +38,24 @@
   border: 1.5px solid #ccc;
   border-radius: 6px;
   font-size: 14px;
-  transition: border-color 0.2s;
+  margin-top: 10px;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .issue-form input:focus,
 .issue-form select:focus,
 .issue-form textarea:focus {
   border-color: #138808;
+  box-shadow: 0 0 4px rgba(19,136,8,0.3);
   outline: none;
 }
 
-.location-group input {
+.location-group input,
+.location-group select {
   margin-bottom: 10px;
 }
 
+/* Image Upload Section */
 .image-upload-container {
   display: flex;
   gap: 10px;
@@ -68,7 +74,7 @@
   position: relative;
   border-radius: 6px;
   overflow: hidden;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, transform 0.2s;
 }
 
 .image-slot img {
@@ -79,14 +85,14 @@
 
 .image-slot .remove-btn {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 3px;
+  right: 3px;
   background: rgba(0,0,0,0.6);
   color: white;
   border: none;
   border-radius: 50%;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   cursor: pointer;
   font-size: 14px;
   line-height: 18px;
@@ -96,6 +102,7 @@
 .image-slot:hover {
   border-color: #138808;
   color: #138808;
+  transform: scale(1.03);
 }
 
 .add-slot {
@@ -109,8 +116,10 @@
   justify-content: center;
   align-items: center;
   font-size: 28px;
+  color: #555;
 }
 
+/* Submit Button */
 .submit-btn {
   width: 100%;
   padding: 14px;
@@ -120,10 +129,100 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  margin-top: 15px;
+  margin-top: 20px;
   font-size: 16px;
+  transition: background-color 0.2s, transform 0.2s;
 }
 
 .submit-btn:hover {
   background-color: #0f7005;
+  transform: scale(1.02);
+}
+
+/* Loader Spinner */
+.loader {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #ffffff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Action Buttons Section */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 25px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 12px 10px;
+  font-weight: 600;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  font-size: 15px;
+  min-width: 120px;
+  text-align: center;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* Different button colors */
+.reply {
+  background-color: #0d6efd;
+}
+.reply:hover {
+  background-color: #0b5ed7;
+}
+
+.forward {
+  background-color: #ff9f00;
+}
+.forward:hover {
+  background-color: #e68900;
+}
+
+.forward-close {
+  background-color: #dc3545;
+}
+.forward-close:hover {
+  background-color: #b02a37;
+}
+
+.transfer {
+  background-color: #6610f2;
+}
+.transfer:hover {
+  background-color: #520dc2;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .register-issue-container {
+    padding: 20px;
+    margin: 20px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-btn {
+    width: 100%;
+  }
 }

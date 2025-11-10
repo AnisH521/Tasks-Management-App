@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { FaArrowRight, FaEdit } from "react-icons/fa";
+import { FaArrowRight, FaReply, FaExchangeAlt } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./IssueDetails.css";
@@ -13,17 +13,26 @@ function IssueDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // ✅ Add this to get logged-in user
+  const [user, setUser] = useState(null);
+
   // Forward modal state
   const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
   const [department, setDepartment] = useState("");
   const [jagEmail, setJagEmail] = useState("");
   const [forwardLoading, setForwardLoading] = useState(false);
 
-  // Update status modal state
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [message, setMessage] = useState("");
-  const [status, setStatus] = useState("");
-  const [updateLoading, setUpdateLoading] = useState(false);
+  // Close modal state
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+  const [closeLoading, setCloseLoading] = useState(false);
+
+  // ✅ Load user info
+  useEffect(() => {
+    const storedUser = localStorage.getItem("userInfo");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -72,8 +81,8 @@ function IssueDetails() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to forward ticket");
 
-      toast.success("Status updated successfully");
-      navigate("/monitor/issues"); // ✅ redirect after success
+      toast.success("Ticket forwarded successfully");
+      navigate("/monitor/issues");
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -81,39 +90,42 @@ function IssueDetails() {
     }
   };
 
-  // Update status submit
-  const handleUpdateSubmit = async () => {
-    if (!message || !status) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-    setUpdateLoading(true);
+  // Temporary handlers
+  const handleReply = () => toast.info("Reply clicked (feature coming soon)");
+  const handleTransfer = () =>
+    toast.info("Transfer clicked (feature coming soon)");
+  const handleClose = () => toast.info("Close clicked (feature coming soon)");
+
+  const handleCloseConfirm = async () => {
+    setCloseLoading(true);
     try {
       const res = await fetch(
-        `${API_BASE_URL}/api/v1/tickets/update/${issueId}`,
+        `${API_BASE_URL}/api/v1/tickets/close/${issueId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ message, status }),
         }
       );
-
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to update ticket");
+      if (!res.ok) throw new Error(data.message || "Failed to close ticket");
 
-      toast.success("Status updated successfully");
-      navigate("/monitor/issues"); // ✅ redirect after success
+      toast.success("Ticket closed successfully");
+      navigate("/monitor/issues");
     } catch (err) {
       toast.error(err.message);
     } finally {
-      setUpdateLoading(false);
+      setCloseLoading(false);
+      setIsCloseModalOpen(false);
     }
   };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
   if (!issue) return <p>No issue found.</p>;
+
+  // ✅ Check if user is supervisor
+  const isSupervisor = user?.department?.toLowerCase() === "supervisor";
 
   return (
     <div className="issue-details-container">
@@ -122,6 +134,7 @@ function IssueDetails() {
         ← Back
       </button>
       <h2>Issue Details</h2>
+
       <div>
         <strong>Building:</strong> {issue.location?.building || "-"}
       </div>
@@ -147,25 +160,39 @@ function IssueDetails() {
         <strong>Status:</strong> {issue.status || "-"}
       </div>
       <div>
-        <strong>JAG Assigned:</strong> {issue.jagAssigned || "-"}
+        <strong>BO Assigned:</strong> {issue.jagAssigned || "-"}
       </div>
       <div>
-        <strong>JAG Email:</strong> {issue.jagEmail || "-"}
+        <strong>BO Email:</strong> {issue.jagEmail || "-"}
       </div>
 
+      {/* ✅ Conditional Action Buttons */}
       <div className="buttons-container">
-        <button
-          className="update-button"
-          onClick={() => setIsUpdateModalOpen(true)}
-        >
-          Update Status <FaEdit style={{ marginLeft: "5px" }} />
-        </button>
-        <button
-          className="forward-button"
-          onClick={() => setIsForwardModalOpen(true)}
-        >
-          Forward <FaArrowRight style={{ marginLeft: "5px" }} />
-        </button>
+        {isSupervisor ? (
+          // Only reply button if supervisor
+          <button className="reply-button" onClick={handleReply}>
+            Reply <FaReply style={{ marginLeft: "5px" }} />
+          </button>
+        ) : (
+          // Otherwise show all buttons
+          <>
+            <button className="reply-button" onClick={handleReply}>
+              Reply <FaReply style={{ marginLeft: "5px" }} />
+            </button>
+            <button
+              className="forward-button"
+              onClick={() => setIsForwardModalOpen(true)}
+            >
+              Forward <FaArrowRight style={{ marginLeft: "5px" }} />
+            </button>
+            <button className="transfer-button" onClick={handleTransfer}>
+              Transfer <FaExchangeAlt style={{ marginLeft: "5px" }} />
+            </button>
+            <button className="close" onClick={handleClose}>
+              Close Ticket
+            </button>
+          </>
+        )}
       </div>
 
       {/* Forward Modal */}
@@ -182,7 +209,7 @@ function IssueDetails() {
               />
             </label>
             <label>
-              JAG Email:
+              BO Email:
               <input
                 type="email"
                 value={jagEmail}
@@ -201,38 +228,16 @@ function IssueDetails() {
         </div>
       )}
 
-      {/* Update Status Modal */}
-      {isUpdateModalOpen && (
+      {/* Close Ticket Modal */}
+      {isCloseModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Update Status</h3>
-            <label>
-              Message:
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              />
-            </label>
-            <label>
-              Status:
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <option value="">-- Select Status --</option>
-                <option value="open">Open</option>
-                <option value="forwarded">Forwarded</option>
-                <option value="rejected">Rejected</option>
-                <option value="closed">Closed</option>
-              </select>
-            </label>
+            <h3>Confirm Close Ticket</h3>
+            <p>Are you sure you want to close this ticket?</p>
             <div className="modal-buttons">
-              <button onClick={() => setIsUpdateModalOpen(false)}>
-                Cancel
-              </button>
-              <button onClick={handleUpdateSubmit} disabled={updateLoading}>
-                {updateLoading ? "Submitting..." : "Submit"}
+              <button onClick={() => setIsCloseModalOpen(false)}>Cancel</button>
+              <button onClick={handleCloseConfirm} disabled={closeLoading}>
+                {closeLoading ? "Closing..." : "Yes, Close"}
               </button>
             </div>
           </div>
