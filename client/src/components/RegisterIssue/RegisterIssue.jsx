@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./RegisterIssue.css";
-import { toast, ToastContainer } from "react-toastify"; // Import ToastContainer
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { API_BASE_URL } from "../../config";
 import { useNavigate } from "react-router-dom";
@@ -8,13 +8,18 @@ import { useNavigate } from "react-router-dom";
 function RegisterIssue() {
   const [category, setCategory] = useState("Safety");
   const [complaintDescription, setComplaintDescription] = useState("");
-  const [building, setBuilding] = useState("");
-  const [floor, setFloor] = useState("");
-  const [room, setRoom] = useState("");
+  const [section, setSection] = useState("");
+  const [station, setStation] = useState("");
+  const [locationAddress, setLocationAddress] = useState("");
+  const [landmark, setLandmark] = useState("");
+  const [jagAssigned, setJagAssigned] = useState("");
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  // Example role for testing purpose (can be dynamic)
+  const userRole = "control"; // can be 'user', 'control', or 'bo'
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -28,27 +33,30 @@ function RegisterIssue() {
     setImages(updatedImages);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, actionType = "register") => {
     e.preventDefault();
     setLoading(true);
 
+    // API Payload in the required format
     const payload = {
       category,
       complaintDescription,
       location: {
-        building,
-        floor,
-        room,
+        section,
+        station,
+        locationAddress,
+        landmark,
       },
-      jagAssigned: "", // blank
+      sicAssigned: "Sarah", // hidden field for testing
+      jagAssigned:
+        userRole === "control" || userRole === "bo" ? jagAssigned : "",
+      actionType,
     };
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/tickets/register`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(payload),
       });
@@ -56,26 +64,29 @@ function RegisterIssue() {
       const data = await response.json();
 
       if (data.status) {
-        toast.success("Registered successfully.");
+        toast.success(data.message || "Complaint registered successfully");
 
-        // Reset form
-        setCategory("Safety");
-        setComplaintDescription("");
-        setBuilding("");
-        setFloor("");
-        setRoom("");
-        setImages([]);
+        // Reset form only on register
+        if (actionType === "register") {
+          setCategory("Safety");
+          setComplaintDescription("");
+          setSection("");
+          setStation("");
+          setLocationAddress("");
+          setLandmark("");
+          setJagAssigned("");
+          setImages([]);
 
-        // redirect
-        setTimeout(() => {
-          navigate("/monitor/issues");
-        }, 1500);
+          setTimeout(() => {
+            navigate("/monitor/issues");
+          }, 1500);
+        }
       } else {
-        toast.error(`Error: ${data.message || "Something went wrong"}`);
+        toast.error(data.message || "Something went wrong");
       }
     } catch (error) {
-      console.error("Error registering issue:", error);
-      toast.error("Error registering issue. Please try again.");
+      console.error("Error submitting issue:", error);
+      toast.error("Error submitting issue. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -84,7 +95,10 @@ function RegisterIssue() {
   return (
     <div className="register-issue-container">
       <h2>Register An Issue</h2>
-      <form className="issue-form" onSubmit={handleSubmit}>
+      <form
+        className="issue-form"
+        onSubmit={(e) => handleSubmit(e, "register")}
+      >
         {/* Category */}
         <div className="form-group">
           <label htmlFor="category">Category</label>
@@ -98,29 +112,6 @@ function RegisterIssue() {
             <option value="Asset-Failure">Asset-Failure</option>
             <option value="Non-Safety">Non-Safety</option>
           </select>
-
-          {/* Location */}
-          <div className="form-group location-group">
-            <label>Location</label>
-            <input
-              type="text"
-              placeholder="Building"
-              value={building}
-              onChange={(e) => setBuilding(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Floor"
-              value={floor}
-              onChange={(e) => setFloor(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Room"
-              value={room}
-              onChange={(e) => setRoom(e.target.value)}
-            />
-          </div>
         </div>
 
         {/* Complaint Description */}
@@ -134,6 +125,58 @@ function RegisterIssue() {
             onChange={(e) => setComplaintDescription(e.target.value)}
           ></textarea>
         </div>
+
+        {/* Location Details */}
+        <div className="form-group location-group">
+          <label>Location Details</label>
+
+          <input
+            type="text"
+            placeholder="Section *"
+            required
+            value={section}
+            onChange={(e) => setSection(e.target.value)}
+          />
+
+          <select
+            required
+            value={station}
+            onChange={(e) => setStation(e.target.value)}
+          >
+            <option value="">Select Station *</option>
+            <option value="Station A">Station A</option>
+            <option value="Station B">Station B</option>
+            <option value="Station C">Station C</option>
+          </select>
+
+          <input
+            type="text"
+            placeholder="Location/Address (can be KM)"
+            value={locationAddress}
+            onChange={(e) => setLocationAddress(e.target.value)}
+          />
+
+          <input
+            type="text"
+            placeholder="Landmark"
+            value={landmark}
+            onChange={(e) => setLandmark(e.target.value)}
+          />
+        </div>
+
+        {/* JAG Assigned (Only visible for control/bo role) */}
+        {(userRole === "control" || userRole === "bo") && (
+          <div className="form-group">
+            <label htmlFor="jagAssigned">BO Assigned</label>
+            <input
+              type="text"
+              id="jagAssigned"
+              placeholder="Enter BO name"
+              value={jagAssigned}
+              onChange={(e) => setJagAssigned(e.target.value)}
+            />
+          </div>
+        )}
 
         {/* Image Upload */}
         <div className="form-group">
@@ -151,7 +194,6 @@ function RegisterIssue() {
                 </button>
               </div>
             ))}
-
             {images.length < 4 && (
               <div className="image-slot add-slot">
                 <label htmlFor="imageUpload">+</label>
@@ -167,17 +209,12 @@ function RegisterIssue() {
           </div>
         </div>
 
-        {/* Submit Button with Loader */}
+        {/* Submit Button */}
         <button type="submit" className="submit-btn" disabled={loading}>
-          {loading ? (
-            <span className="loader"></span> // loader spinner
-          ) : (
-            "Submit"
-          )}
+          {loading ? <span className="loader"></span> : "Submit"}
         </button>
       </form>
 
-      {/* Add ToastContainer here */}
       <ToastContainer position="top-right" autoClose={2000} />
     </div>
   );
