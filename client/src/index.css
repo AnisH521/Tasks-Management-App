@@ -23,9 +23,37 @@ ul {
   list-style: none;
 }
 
- 
- 
- 
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.7); /* semi-transparent */
+    color: #fff;
+    overflow: hidden;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    z-index: 1000;
+    font-size: 14px;
+}
 
- 
- 
+.marquee {
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+}
+
+.marquee span {
+    display: inline-block;
+    padding-left: 100%;
+    animation: scroll-left 25s linear infinite;
+}
+
+@keyframes scroll-left {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
