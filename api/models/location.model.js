@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 const locationSchema = new Schema(
   {
-    section: {
+    station: {
       type: String,
       required: true,
     },
