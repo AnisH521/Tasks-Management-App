@@ -4,6 +4,8 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { API_BASE_URL } from "../../config";
 import { useNavigate } from "react-router-dom";
+import stations from "../../../stations.json";
+import Select from "react-select";
 
 function RegisterIssue() {
   const [category, setCategory] = useState("Safety");
@@ -17,6 +19,11 @@ function RegisterIssue() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  const options = stations.map(s => ({
+  value: s.code,
+  label: `${s.code} - ${s.name}`
+}));
 
   // Example role for testing purpose (can be dynamic)
   const userRole = "control"; // can be 'user', 'control', or 'bo'
@@ -138,7 +145,7 @@ function RegisterIssue() {
             onChange={(e) => setSection(e.target.value)}
           />
 
-          <select
+          {/* <select
             required
             value={station}
             onChange={(e) => setStation(e.target.value)}
@@ -147,7 +154,9 @@ function RegisterIssue() {
             <option value="Station A">Station A</option>
             <option value="Station B">Station B</option>
             <option value="Station C">Station C</option>
-          </select>
+          </select> */}
+
+          <Select options={options} placeholder="Select Station" isSearchable />
 
           <input
             type="text"
