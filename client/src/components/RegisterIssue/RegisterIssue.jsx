@@ -20,10 +20,10 @@ function RegisterIssue() {
 
   const navigate = useNavigate();
 
-  const options = stations.map(s => ({
-  value: s.code,
-  label: `${s.code} - ${s.name}`
-}));
+  const options = stations.map((s) => ({
+    value: s.code,
+    label: `${s.code} - ${s.name}`,
+  }));
 
   // Example role for testing purpose (can be dynamic)
   const userRole = "control"; // can be 'user', 'control', or 'bo'
@@ -136,15 +136,6 @@ function RegisterIssue() {
         {/* Location Details */}
         <div className="form-group location-group">
           <label>Location Details</label>
-
-          <input
-            type="text"
-            placeholder="Section *"
-            required
-            value={section}
-            onChange={(e) => setSection(e.target.value)}
-          />
-
           {/* <select
             required
             value={station}
@@ -157,14 +148,49 @@ function RegisterIssue() {
           </select> */}
 
           <Select options={options} placeholder="Select Station" isSearchable />
+          {/* <input
+            type="text"
+            placeholder="Section *"
+            required
+            value={section}
+            onChange={(e) => setSection(e.target.value)}
+          /> */}
 
+          <select
+            required
+            placeholder="Section *"
+            value={section}
+            onChange={(e) => setSection(e.target.value)}
+          >
+            <option value="">Select Section *</option>
+            <option value="Sealdah Barrackpore Section">
+              Sealdah Barrackpore Section
+            </option>
+            <option value="Sealdah Dankuni Section">
+              Sealdah Dankuni Section
+            </option>
+            <option value="Sealdah Bongaon Section">
+              Sealdah Bongaon Section
+            </option>
+            <option value="Sealdah Canning Section">
+              Sealdah Canning Section
+            </option>
+            <option value="Sealdah Lakhikantapur Section">
+              Sealdah Lakhikantapur Section
+            </option>
+            <option value="Sealdah Diamond Harbour Section">
+              Sealdah Diamond Harbour Section
+            </option>
+            <option value="Sealdah Namkhana Section">
+              Sealdah Namkhana Section
+            </option>
+          </select>
           <input
             type="text"
             placeholder="Location/Address (can be KM)"
             value={locationAddress}
             onChange={(e) => setLocationAddress(e.target.value)}
           />
-
           <input
             type="text"
             placeholder="Landmark"
