@@ -41,7 +41,6 @@ const ticketSchema = new Schema(
 
     department: {
       type: String,
-      enum: ["Finance", "IT", "Controller", "Supervisor"],
       required: true,
     },
 
@@ -51,6 +50,11 @@ const ticketSchema = new Schema(
     },
 
     employeeEmail: {
+      type: String,
+      required: true,
+    },
+
+    assignedUser: {
       type: String,
       required: true,
     },

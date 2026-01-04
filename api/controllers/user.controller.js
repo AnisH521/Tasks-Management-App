@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 import { User } from "../models/user.model.js";
 import { createJWT } from "../util/createJWT.js";
 import { RESPONSE_MESSAGES } from "../constant/responseMessage.js";
@@ -72,11 +73,15 @@ export const registerUser = async (req, res) => {
         .json({ message: RESPONSE_MESSAGES.INVALID_USER_ROLE });
     }
 
+    // create unique userID
+    const userID = uuidv4();
+
     // Create a new user
     const newUser = new User({
       name,
       email,
       department,
+      userID,
       password,
       role,
       isAdmin,
@@ -108,9 +113,9 @@ export const registerUser = async (req, res) => {
 };
 
 export const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { userID, password } = req.body;
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ userID });
 
   if (!user) {
     return res

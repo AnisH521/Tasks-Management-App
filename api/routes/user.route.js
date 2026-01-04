@@ -14,7 +14,9 @@ import { isAdminRoute, protectedRoute } from "../middleware/authMiddleware.js";
 // Express Router instance
 export const userRouter = express.Router();
 
-userRouter.route("/register").post(protectedRoute, isAdminRoute, registerUser);
+userRouter.route("/register").post(protectedRoute, registerUser);
+
+// userRouter.route("/register").post(protectedRoute, isAdminRoute, registerUser);
 
 userRouter.route("/login").post(loginUser);
 

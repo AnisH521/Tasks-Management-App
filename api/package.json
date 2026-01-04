@@ -22,7 +22,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.4",
     "morgan": "^1.10.1",
-    "pm2": "^6.0.8"
+    "pm2": "^6.0.8",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.9.0",

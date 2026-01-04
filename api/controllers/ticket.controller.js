@@ -4,7 +4,6 @@ import { User } from "../models/user.model.js";
 import { getEndUserDashboard } from "../services/dashboard.service.js";
 import { RESPONSE_MESSAGES } from "../constant/responseMessage.js";
 import {
-  USER_DEPARTMENTS,
   USER_ROLES,
   VALID_DEPARTMENTS,
   VALIDATION_MESSAGES,
@@ -51,9 +50,10 @@ export const registerTicket = async (req, res) => {
     const newTicket = new Ticket({
       category,
       complaintDescription: complaintDescription.trim(),
-      department: USER_DEPARTMENTS.CONTROLLER,
+      department: currentUser.department,
       employeeName: currentUser.name,
       employeeEmail: currentUser.email,
+      assignedUser: USER_ROLES.CONTROLLER,
       location: {
         section: location?.section?.trim() || "",
         address: location?.address?.trim() || "",

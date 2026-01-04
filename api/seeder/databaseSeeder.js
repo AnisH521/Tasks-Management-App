@@ -1,11 +1,29 @@
 import { faker } from '@faker-js/faker';
+import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import { USER_ROLES, VALID_ROLES } from '../constant/userMessage.js';
 import { User } from '../models/user.model.js';
 import { Ticket } from '../models/ticket.model.js';
 
 // Sample data templates
-const departments = ["Finance", "IT", "Controller", "Supervisor"];  
+const departments = [
+  "SRDMECO",
+  "SRDMEENHM",
+  "SRDOM",
+  "SRDFM",
+  "SRDCM",
+  "SRDSC",
+  "SRDSO",
+  "SRDPO",
+  "SRDEEG",
+  "SRDEEEMU",
+  "SRDEETRS",
+  "SRDEEOP",
+  "SRDMELOCO",
+  "SRDST",
+  "SRDEN",
+];
+  
 const categories = ["Safety", "Non-Safety", "Asset-Failure"];  
 const statuses = ["open", "forwarded", "closed", "rejected"];  
 
@@ -25,6 +43,7 @@ const generateDummyUsers = async (count = 20) => {
       name: faker.person.fullName(),
       email: faker.internet.email().toLowerCase(),
       department: faker.helpers.arrayElement(departments),
+      userID: uuidv4(),
       password: hashedPassword,
       role,
       isAdmin,
