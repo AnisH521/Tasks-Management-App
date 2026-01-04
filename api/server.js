@@ -16,6 +16,7 @@ dotenv.config();
 
 connectDB();
 // await seedDatabase();
+//
 
 // Define the port from environment variables or default to 4000
 // This allows the server to run on a specified port, useful for deployment or local development
