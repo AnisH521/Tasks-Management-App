@@ -28,7 +28,11 @@ const ticketSchema = new Schema(
   {
     category: {
       type: String,
-      enum: ["Safety", "Non-Safety", "Asset-Failure"],
+      required: true,
+    },
+
+    subCategory: {
+      type: String,
       required: true,
     },
 
@@ -36,7 +40,7 @@ const ticketSchema = new Schema(
       type: String,
       required: true,
       trim: true,
-      maxLength: 1000,
+      maxLength: 6000,
     },
 
     department: {
@@ -49,7 +53,7 @@ const ticketSchema = new Schema(
       required: true,
     },
 
-    employeeEmail: {
+    employeeID: {
       type: String,
       required: true,
     },
@@ -59,39 +63,15 @@ const ticketSchema = new Schema(
       required: true,
     },
 
-    location: {
-      section: {
+    section: {
         type: String,
         required: false,
       },
-      address: {
-        type: String,
-        required: false,
-      },
-      landmark: {
-        type: String,
-        required: false,
-      },
-    },
 
     status: {
       type: String,
       enum: ["open", "forwarded", "closed", "rejected"],
       default: "open",
-    },
-
-    // JAG handling
-    jagAssigned: {
-      type: String,
-      required: false,
-    },
-    jagAssignedDepartment: {
-      type: String,
-      required: false,
-    },
-    jagEmail: {
-      type: String,
-      required: false,
     },
     message: {
       type: String,

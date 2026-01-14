@@ -21,7 +21,7 @@ ticketRouter.route("/get/:ticketId").get(protectedRoute, getTicketById);
 
 ticketRouter.route("/update/:ticketId").put(protectedRoute, updateTicketStatus);
 
-ticketRouter.route("/forward/:ticketId").put(protectedRoute, forwardComplaint);
+ticketRouter.route("/forward").put(protectedRoute, forwardComplaint);
 
 ticketRouter
   .route("/delete/:ticketId")

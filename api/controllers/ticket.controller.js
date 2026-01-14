@@ -9,22 +9,49 @@ import {
   VALIDATION_MESSAGES,
 } from "../constant/userMessage.js";
 import {
-  VALID_CATEGORIES,
+  DETENTION_CATEGORIES,
+  SECTIONS,
+  TICKET_STATUSES,
   VALID_STATUSES,
-  VALIDATION_MESSAGE,
 } from "../constant/ticketMessage.js";
 
 // Controller to register a new ticket
 // This function handles the registration of a new ticket by an end user
 export const registerTicket = async (req, res) => {
   try {
-    const { category, complaintDescription, location } = req.body;
+    const { category, subCategory, complaintDescription, section } = req.body;
 
     // Validate required fields
-    if (!category || !complaintDescription || !location) {
+    if (!category || !complaintDescription || !section) {
       return res.status(400).json({
         status: false,
         message: RESPONSE_MESSAGES.REQUIRED_FIELDS,
+      });
+    }
+
+        // 1. Validate required fields
+    if (!category || !complaintDescription || !section) {
+      return res.status(400).json({
+        status: false,
+        message: "Please provide Category, Description, and Section.",
+      });
+    }
+
+    // 2. Validate Section
+    if (!SECTIONS.includes(section)) {
+        return res.status(400).json({
+            status: false,
+            message: "Invalid Section provided.",
+        });
+    }
+
+    // 3. Validate Category & Subcategory logic
+    const selectedCategory = DETENTION_CATEGORIES[category];
+    
+    if (!selectedCategory) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid Category Code.",
       });
     }
 
@@ -38,27 +65,16 @@ export const registerTicket = async (req, res) => {
       });
     }
 
-    // Validate department and categories
-    if (!VALID_CATEGORIES.includes(category)) {
-      return res.status(400).json({
-        status: false,
-        message: VALIDATION_MESSAGES.INVALID_CATEGORY,
-      });
-    }
-
     // Create new ticket
     const newTicket = new Ticket({
-      category,
+      category: category,
+      subCategory: subCategory,
       complaintDescription: complaintDescription.trim(),
       department: currentUser.department,
       employeeName: currentUser.name,
-      employeeEmail: currentUser.email,
+      employeeID: currentUser.userID,
       assignedUser: USER_ROLES.CONTROLLER,
-      location: {
-        section: location?.section?.trim() || "",
-        address: location?.address?.trim() || "",
-        landmark: location?.landmark?.trim() || "",
-      },
+      section: section || "",
       status: "open",
     });
 
@@ -120,7 +136,6 @@ export const getComplaints = async (req, res) => {
     if (category) query.category = category;
 
     const complaints = await Ticket.find(query)
-      .populate("jagAssigned", "name surname email department")
       .sort({ createdAt: -1 });
 
     const totalCount = await Ticket.countDocuments(query);
@@ -191,17 +206,16 @@ export const getTicketById = async (req, res) => {
 
 export const forwardComplaint = async (req, res) => {
   try {
-    const { ticketId } = req.params;
-    const { department, JAGEmail } = req.body;
+    const { ticketId, targetUserId} = req.body; 
 
-    if (!JAGEmail || !department) {
+    // 1. Basic Validation
+    if (!targetUserId) {
       return res.status(400).json({
         status: false,
-        message: "JAG email and department are required",
+        message: "Target User ID is required to forward.",
       });
     }
 
-    // Validate if ID is a valid MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(ticketId)) {
       return res.status(400).json({
         status: false,
@@ -209,63 +223,91 @@ export const forwardComplaint = async (req, res) => {
       });
     }
 
-    // Validate department
-    if (!VALID_DEPARTMENTS.includes(department)) {
-      return res.status(400).json({
-        status: false,
-        message: VALIDATION_MESSAGES.INVALID_DEPARTMENT,
-      });
-    }
-
-    // Find ticket by ID and check existence
+    // 2. Fetch Data (Ticket, Current User, Target User)
     const ticket = await Ticket.findById(ticketId);
-
     if (!ticket) {
-      return res.status(404).json({
-        status: false,
-        message: "Ticket not found",
-      });
+      return res.status(404).json({ status: false, message: "Ticket not found" });
     }
 
-    // Get current user from middleware  and check existence
     const currentUser = await User.findById(req.user.userId);
-
     if (!currentUser) {
-      return res.status(404).json({
-        status: false,
-        message: RESPONSE_MESSAGES.USER_NOT_FOUND,
-      });
+      return res.status(404).json({ status: false, message: RESPONSE_MESSAGES.USER_NOT_FOUND });
     }
 
-    // check if JAG email is provided
-    // check if user is JAG and provided department is same as jag department
-    // Forward ticket to the specified department
-    // Change the department and JAG assigned
-    if (JAGEmail) {
-      const user = await User.findOne({ email: JAGEmail });
-      if (
-        user &&
-        user.role === USER_ROLES.JAG &&
-        user.department === department
-      ) {
-        ticket.jagAssigned = user.name;
-        ticket.jagAssignedDepartment = user.department;
-        ticket.jagEmail = user.email;
-        ticket.department = department;
-      } else {
-        return res.status(400).json({
-          status: false,
-          message: "Invalid data provided",
-        });
+    // Check if target user exists
+    const targetUser = await User.findOne({ userID: targetUserId });
+    
+    if (!targetUser) {
+      return res.status(404).json({ status: false, message: "Target user not found" });
+    }
+
+    // 3. AUTHORIZATION LOGIC (The Core Requirement)
+    let isAllowed = false;
+
+    // --- CASE A: ADMIN (Has all power) ---
+    if (currentUser.role === USER_ROLES.ADMIN) {
+      isAllowed = true;
+    }
+
+    // --- CASE B: CONTROLLER ---
+    else if (currentUser.role === USER_ROLES.CONTROLLER) {
+      // 1. Own Department BO / Sr Scale / Jr Scale
+      // check if target is in same department AND is a BO/Officer
+      const isSameDept = targetUser.department === currentUser.department;
+      const isTargetOfficer = targetUser.role === USER_ROLES.OFFICER; 
+      
+      // 2. Other Department Control
+      const isTargetControl = targetUser.role === USER_ROLES.CONTROLLER;
+
+      // 3. Issue Raiser
+      // We check if targetUser._id matches ticket.raisedBy.id
+      const isRaiser = ticket.employeeID === targetUser.userID;
+
+      if ((isSameDept && isTargetOfficer) || isTargetControl || isRaiser) {
+        isAllowed = true;
       }
     }
+
+    // --- CASE C: BO (Branch Officer) ---
+    else if (currentUser.role === USER_ROLES.OFFICER) {
+      // 1. Above (Admin)
+      const isTargetAdmin = targetUser.role === USER_ROLES.ADMIN;
+
+      // 2. Other Department BO (or same dept BO)
+      const isTargetBO = targetUser.role === USER_ROLES.OFFICER;
+
+      if (isTargetAdmin || isTargetBO) {
+        isAllowed = true;
+      }
+    }
+
+    // 4. Final Decision
+    if (!isAllowed) {
+      return res.status(403).json({
+        status: false,
+        message: `You are not authorized to forward tickets to ${targetUser.role} in ${targetUser.department}.`,
+      });
+    }
+
+    // 5. Perform the Forward Action
+    // Update ticket assigned user/department/status
+    ticket.assignedUser = targetUser.role;
+    ticket.department = targetUser.department;
+    ticket.status = TICKET_STATUSES.FORWARDED;
+
     await ticket.save();
 
     return res.status(200).json({
       status: true,
-      message: "Ticket forwarded successfully and new JAG assigned",
-      data: ticket,
+      message: `Ticket forwarded successfully to ${targetUser.username}`,
+      data: {
+        ticketId: ticket._id,
+        assignedTo: targetUser.username,
+        department: ticket.department,
+        status: ticket.status
+      },
     });
+
   } catch (error) {
     console.error("Error forwarding ticket:", error);
     return res.status(500).json({
@@ -304,7 +346,7 @@ export const updateTicketStatus = async (req, res) => {
       if (!VALID_STATUSES.includes(status)) {
         return res.status(400).json({
           status: false,
-          message: VALIDATION_MESSAGE.INVALID_STATUS,
+          message: "validation error",
         });
       }
       updateFields.status = status;
@@ -360,7 +402,6 @@ export const updateTicketStatus = async (req, res) => {
   }
 };
 
-// Controller to add a reply/chat message to a ticket
 export const addReplyToTicket = async (req, res) => {
   try {
     const { ticketId, sender, message, senderRole } = req.body;

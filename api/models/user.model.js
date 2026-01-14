@@ -8,11 +8,6 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    email: {
-      type: String,
-      required: false,
-      unique: true,
-    },
     department: {
       type: String,
       required: true,
@@ -29,21 +24,16 @@ const userSchema = new Schema(
     role: {
       type: String,
       enum: VALID_ROLES,
-      default: USER_ROLES.END_USER,
     },
-    isAdmin: {
+    isSrScale: {
       type: Boolean,
+      default: false,     
+    },
+    isJrScale: {
+      type: Boolean,  
       default: false,
     },
-    isSIC: {
-      type: Boolean,
-      default: false,
-    },
-    isASTOfficer: {
-      type: Boolean,
-      default: false,
-    },
-    isJAG: {
+    isSrDME: {
       type: Boolean,
       default: false,
     },

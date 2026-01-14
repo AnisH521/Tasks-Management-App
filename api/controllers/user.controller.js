@@ -1,102 +1,92 @@
 import mongoose from "mongoose";
-import { v4 as uuidv4 } from "uuid";
 import { User } from "../models/user.model.js";
 import { createJWT } from "../util/createJWT.js";
 import { RESPONSE_MESSAGES } from "../constant/responseMessage.js";
-import { USER_ROLES } from "../constant/userMessage.js";
+import { deptPrefixMap, USER_ROLES } from "../constant/userMessage.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const {
-      name,
-      email,
-      department,
-      password,
-      role,
-      isAdmin,
-      isSIC,
-      isASTOfficer,
-      isJAG,
+    const { 
+      name, 
+      department, 
+      password, 
+      role, 
+      isSrScale, 
+      isJrScale, 
+      isSrDME 
     } = req.body;
 
-    // Validate required fields
-    if (
-      !name ||
-      !email ||
-      !department ||
-      !password ||
-      !role ||
-      isAdmin === undefined ||
-      isSIC === undefined ||
-      isASTOfficer === undefined ||
-      isJAG === undefined
-    ) {
-      return res
-        .status(400)
-        .json({ message: RESPONSE_MESSAGES.REQUIRED_FIELDS });
+    // 1. Basic Validation
+    if (!name || !department || !password || !role) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please provide name, department, password, and role.' 
+      });
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: RESPONSE_MESSAGES.USER_EXISTS });
+    const deptCode = deptPrefixMap[department] || department.substring(0, 4).toUpperCase();
+
+    // 3. Determine Base ID String based on Role & Flags
+    let idBaseString = '';
+
+    if (role === 'Supervisor') {
+      idBaseString = `${deptCode}_SUP`;
+    } else if (role === 'Controller') {
+      idBaseString = `${deptCode}_CONTROL`; 
+    } else if (role === 'Officer') {
+      // Logic for Branch Officers based on flags
+      if (isSrDME) idBaseString = `SR_DME_${deptCode}`; // e.g. SR_DME_MECH
+      else if (isSrScale) idBaseString = `${deptCode}_SR_SCALE`;
+      else if (isJrScale) idBaseString = `${deptCode}_JR_SCALE`;
+      else idBaseString = `${deptCode}_BO`; // Fallback
+    } else if (role === 'Admin') {
+       idBaseString = `${deptCode}_ADMIN`;
+    } else {
+       idBaseString = `${deptCode}_USER`;
     }
 
-    // check if user role and user role flag matches
-    if (
-      (isAdmin !== true && role == USER_ROLES.ADMIN) ||
-      (isAdmin == true && role != USER_ROLES.ADMIN)
-    ) {
-      return res
-        .status(400)
-        .json({ message: RESPONSE_MESSAGES.INVALID_USER_ROLE });
-    } else if (
-      (isSIC !== true && role == USER_ROLES.SIC) ||
-      (isSIC == true && role != USER_ROLES.SIC)
-    ) {
-      return res
-        .status(400)
-        .json({ message: RESPONSE_MESSAGES.INVALID_USER_ROLE });
-    } else if (
-      (isASTOfficer !== true && role == USER_ROLES.ASTOFFICER) ||
-      (isASTOfficer == true && role != USER_ROLES.ASTOFFICER)
-    ) {
-      return res
-        .status(400)
-        .json({ message: RESPONSE_MESSAGES.INVALID_USER_ROLE });
-    } else if (
-      (isJAG !== true && role == USER_ROLES.JAG) ||
-      (isJAG == true && role != USER_ROLES.JAG)
-    ) {
-      return res
-        .status(400)
-        .json({ message: RESPONSE_MESSAGES.INVALID_USER_ROLE });
+    // Unique ID (Auto-Increment Logic)
+    // search for the latest user with this base string to determine the next number
+    // Regex to find IDs starting with base string: ^MECH_SUP_(\d+)$
+    const regex = new RegExp(`^${idBaseString}_(\\d+)$`);
+    
+    // Find the user with the highest number in this category
+    const lastUser = await User.findOne({ userID: regex })
+      .sort({ createdAt: -1 }) // Sort by newest
+      .select('userID');
+
+    let nextNumber = 1;
+    if (lastUser) {
+      const match = lastUser.userID.match(regex);
+      if (match && match[1]) {
+        nextNumber = parseInt(match[1], 10) + 1;
+      }
     }
 
-    // create unique userID
-    const userID = uuidv4();
+    // Final Auto-Generated ID
+    // Example: MECH_SUP_1
+    const finalUserId = `${idBaseString}_${nextNumber}`;
+    console.log('Generated User ID:', finalUserId);
 
     // Create a new user
     const newUser = new User({
       name,
-      email,
       department,
-      userID,
+      userID: finalUserId,
       password,
       role,
-      isAdmin,
-      isSIC,
-      isASTOfficer,
-      isJAG,
+      isSrScale: isSrScale || false,
+      isJrScale: isJrScale || false,
+      isSrDME: isSrDME || false
     });
 
     // Save to database
     const savedUser = await newUser.save();
 
     if (savedUser) {
-      isAdmin ? createJWT(res, savedUser._id) : null;
-
+      createJWT(res, savedUser._id);
       savedUser.password = undefined;
+      
       return res.status(201).json({
         message: RESPONSE_MESSAGES.USER_REGISTERED,
         user: savedUser,
@@ -106,9 +96,13 @@ export const registerUser = async (req, res) => {
         .status(400)
         .json({ message: RESPONSE_MESSAGES.INTERNAL_ERROR });
     }
+
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: RESPONSE_MESSAGES.INTERNAL_ERROR });
+    console.error('Registration Error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server Error during registration' 
+    });
   }
 };
 
@@ -151,48 +145,12 @@ export const logoutUser = (req, res) => {
   }
 };
 
-export const getAllEndUsers = async (req, res) => {
-  try {
-    // Find all users with role 'endUser' and exclude sensitive fields
-    const endUsers = await User.find({
-      role: USER_ROLES.END_USER,
-    }).select("-password -__v");
-
-    if (!endUsers || endUsers.length === 0) {
-      return res.status(404).json({
-        status: false,
-        message: RESPONSE_MESSAGES.USER_NOT_FOUND,
-      });
-    }
-
-    return res.status(200).json({
-      status: true,
-      message: RESPONSE_MESSAGES.SUCCESS,
-      count: endUsers.length,
-      data: endUsers,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: RESPONSE_MESSAGES.INTERNAL_ERROR,
-    });
-  }
-};
-
 export const getUserById = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    // Validate if ID is a valid MongoDB ObjectId
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        status: false,
-        message: RESPONSE_MESSAGES.INVALID_ID_FORMAT,
-      });
-    }
+    const { userID } = req.body;
 
     // Find user by ID and exclude password
-    const user = await User.findById(id).select("-password -__v");
+    const user = await User.findOne({ userID }).select("-password -__v");
 
     if (!user) {
       return res.status(404).json({
@@ -214,27 +172,57 @@ export const getUserById = async (req, res) => {
   }
 };
 
-export const getAllSIC = async (req, res) => {
+export const getAllOfficers = async (req, res) => {
   try {
-    // Find all users with role 'SIC' and exclude sensitive fields
-    const sicUsers = await User.find({
-      role: USER_ROLES.SIC,
-    }).select("-password -__v");
+    const { department, isSrDME, isSrScale, isJrScale } = req.body;
 
-    if (!sicUsers || sicUsers.length === 0) {
+    // Build the Query Object
+    // Start by filtering for the correct Role (Branch Officer)
+    let query = { 
+      role: USER_ROLES.OFFICER // Ensure this matches your enum for 'BO'
+    };
+
+    // Filter by Department (Required or Optional depending on your logic)
+    if (department) {
+      query.department = department;
+    }
+
+    // Conditional Filtering for Specific Ranks
+    // If any of these flags are true in the request query, add them to the filter.
+    
+    if (isSrDME === 'true') {
+      query.isSrDME = true;
+    }
+    
+    if (isSrScale === 'true') {
+      query.isSrScale = true;
+    }
+    
+    if (isJrScale === 'true') {
+      query.isJrScale = true;
+    }
+
+    // Fetch Users
+    const officers = await User.find(query).select("-password -__v");
+
+    // Handle No Results
+    if (!officers || officers.length === 0) {
       return res.status(404).json({
         status: false,
-        message: RESPONSE_MESSAGES.SIC_NOT_FOUND,
+        message: "No officers found matching the criteria.",
       });
     }
 
+    // 6. Return Success Response
     return res.status(200).json({
       status: true,
       message: RESPONSE_MESSAGES.SUCCESS,
-      count: sicUsers.length,
-      data: sicUsers,
+      count: officers.length,
+      data: officers,
     });
+
   } catch (error) {
+    console.error("Error fetching officers:", error);
     return res.status(500).json({
       status: false,
       message: RESPONSE_MESSAGES.INTERNAL_ERROR,
@@ -242,36 +230,79 @@ export const getAllSIC = async (req, res) => {
   }
 };
 
-export const getAllJAG = async (req, res) => {
+export const getAllSupervisors = async (req, res) => {
   try {
     const { department } = req.body;
 
-    if (!department) {
-      return res.status(400).json({
-        status: false,
-        message: RESPONSE_MESSAGES.REQUIRED_FIELDS,
-      });
-    }
-    // Find all users with role 'JAG' and exclude sensitive fields
-    const jagUsers = await User.find({
-      role: USER_ROLES.JAG,
-      department: department,
-    }).select("-password -__v");
+    //  SUPERVISOR role
+    let query = { 
+      role: USER_ROLES.SUPERVISOR // Ensure this matches your enum for Supervisor
+    };
 
-    if (!jagUsers || jagUsers.length === 0) {
+    // Department Filter
+    if (department) {
+      query.department = department;
+    }
+
+    // Fetch Data
+    const supervisors = await User.find(query).select("-password -__v");
+
+    if (!supervisors || supervisors.length === 0) {
       return res.status(404).json({
         status: false,
-        message: RESPONSE_MESSAGES.JAG_NOT_FOUND,
+        message: "No supervisors found.",
       });
     }
 
     return res.status(200).json({
       status: true,
       message: RESPONSE_MESSAGES.SUCCESS,
-      count: jagUsers.length,
-      data: jagUsers,
+      count: supervisors.length,
+      data: supervisors,
     });
+
   } catch (error) {
+    console.error("Error fetching supervisors:", error);
+    return res.status(500).json({
+      status: false,
+      message: RESPONSE_MESSAGES.INTERNAL_ERROR,
+    });
+  }
+};
+
+export const getAllControlUsers = async (req, res) => {
+  try {
+    const { department } = req.body;
+
+    //  CONTROLLER role
+    let query = { 
+      role: USER_ROLES.CONTROLLER
+    };
+
+    // Department Filter
+    if (department) {
+      query.department = department;
+    }
+
+    // 3. Fetch Data
+    const controllers = await User.find(query).select("-password -__v");
+
+    if (!controllers || controllers.length === 0) {
+      return res.status(404).json({
+        status: false,
+        message: "No control users found.",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: RESPONSE_MESSAGES.SUCCESS,
+      count: controllers.length,
+      data: controllers,
+    });
+
+  } catch (error) {
+    console.error("Error fetching control users:", error);
     return res.status(500).json({
       status: false,
       message: RESPONSE_MESSAGES.INTERNAL_ERROR,
@@ -281,18 +312,10 @@ export const getAllJAG = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    // Validate if ID is a valid MongoDB ObjectId
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        status: false,
-        message: RESPONSE_MESSAGES.INVALID_ID_FORMAT,
-      });
-    }
+    const { userID } = req.body;
 
     // Find and delete the user by ID
-    const deletedUser = await User.findByIdAndDelete(id);
+    const deletedUser = await User.findOneAndDelete({ userID });
 
     if (!deletedUser) {
       return res.status(404).json({
