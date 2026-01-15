@@ -268,8 +268,6 @@ export const forwardComplaint = async (req, res) => {
       });
     }
 
-    // 5. Perform the Forward Action
-    // Update ticket assigned user/department/status
     ticket.assignedUser = targetUser.role;
     ticket.department = targetUser.department;
     ticket.status = TICKET_STATUSES.FORWARDED;
