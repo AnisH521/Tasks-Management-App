@@ -5,8 +5,6 @@ import { getEndUserDashboard } from "../services/dashboard.service.js";
 import { RESPONSE_MESSAGES } from "../constant/responseMessage.js";
 import {
   USER_ROLES,
-  VALID_DEPARTMENTS,
-  VALIDATION_MESSAGES,
 } from "../constant/userMessage.js";
 import {
   DETENTION_CATEGORIES,
@@ -15,13 +13,10 @@ import {
   VALID_STATUSES,
 } from "../constant/ticketMessage.js";
 
-// Controller to register a new ticket
-// This function handles the registration of a new ticket by an end user
 export const registerTicket = async (req, res) => {
   try {
     const { category, subCategory, complaintDescription, section } = req.body;
 
-    // Validate required fields
     if (!category || !complaintDescription || !section) {
       return res.status(400).json({
         status: false,
@@ -29,7 +24,6 @@ export const registerTicket = async (req, res) => {
       });
     }
 
-        // 1. Validate required fields
     if (!category || !complaintDescription || !section) {
       return res.status(400).json({
         status: false,
@@ -37,7 +31,6 @@ export const registerTicket = async (req, res) => {
       });
     }
 
-    // 2. Validate Section
     if (!SECTIONS.includes(section)) {
         return res.status(400).json({
             status: false,
@@ -45,7 +38,6 @@ export const registerTicket = async (req, res) => {
         });
     }
 
-    // 3. Validate Category & Subcategory logic
     const selectedCategory = DETENTION_CATEGORIES[category];
     
     if (!selectedCategory) {
@@ -55,7 +47,6 @@ export const registerTicket = async (req, res) => {
       });
     }
 
-    // Get current user from middleware
     const currentUser = await User.findById(req.user.userId);
 
     if (!currentUser) {
@@ -65,7 +56,6 @@ export const registerTicket = async (req, res) => {
       });
     }
 
-    // Create new ticket
     const newTicket = new Ticket({
       category: category,
       subCategory: subCategory,
@@ -78,7 +68,6 @@ export const registerTicket = async (req, res) => {
       status: "open",
     });
 
-    // Save ticket to database
     const savedTicket = await newTicket.save();
 
     if (savedTicket) {
