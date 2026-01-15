@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { User } from "../models/user.model.js";
 import { createJWT } from "../util/createJWT.js";
 import { RESPONSE_MESSAGES } from "../constant/responseMessage.js";
@@ -16,7 +15,6 @@ export const registerUser = async (req, res) => {
       isSrDME 
     } = req.body;
 
-    // 1. Basic Validation
     if (!name || !department || !password || !role) {
       return res.status(400).json({ 
         success: false, 
@@ -26,7 +24,6 @@ export const registerUser = async (req, res) => {
 
     const deptCode = deptPrefixMap[department] || department.substring(0, 4).toUpperCase();
 
-    // 3. Determine Base ID String based on Role & Flags
     let idBaseString = '';
 
     if (role === 'Supervisor') {
@@ -34,8 +31,7 @@ export const registerUser = async (req, res) => {
     } else if (role === 'Controller') {
       idBaseString = `${deptCode}_CONTROL`; 
     } else if (role === 'Officer') {
-      // Logic for Branch Officers based on flags
-      if (isSrDME) idBaseString = `SR_DME_${deptCode}`; // e.g. SR_DME_MECH
+      if (isSrDME) idBaseString = `SR_DME_${deptCode}`;
       else if (isSrScale) idBaseString = `${deptCode}_SR_SCALE`;
       else if (isJrScale) idBaseString = `${deptCode}_JR_SCALE`;
       else idBaseString = `${deptCode}_BO`; // Fallback
@@ -52,7 +48,7 @@ export const registerUser = async (req, res) => {
     
     // Find the user with the highest number in this category
     const lastUser = await User.findOne({ userID: regex })
-      .sort({ createdAt: -1 }) // Sort by newest
+      .sort({ createdAt: -1 })
       .select('userID');
 
     let nextNumber = 1;
@@ -66,9 +62,7 @@ export const registerUser = async (req, res) => {
     // Final Auto-Generated ID
     // Example: MECH_SUP_1
     const finalUserId = `${idBaseString}_${nextNumber}`;
-    console.log('Generated User ID:', finalUserId);
 
-    // Create a new user
     const newUser = new User({
       name,
       department,
@@ -80,7 +74,6 @@ export const registerUser = async (req, res) => {
       isSrDME: isSrDME || false
     });
 
-    // Save to database
     const savedUser = await newUser.save();
 
     if (savedUser) {

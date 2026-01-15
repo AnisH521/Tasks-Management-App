@@ -502,7 +502,6 @@ export const getSubCategories = (mainCategoryCode) => {
   return DETENTION_CATEGORIES[mainCategoryCode]?.subcategories || [];
 };
 
-
 // Ticket Statuses
 export const TICKET_STATUSES = {
   OPEN: "open",
