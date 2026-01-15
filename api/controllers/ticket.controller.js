@@ -202,7 +202,6 @@ export const forwardComplaint = async (req, res) => {
   try {
     const { ticketId, targetUserId} = req.body; 
 
-    // 1. Basic Validation
     if (!targetUserId) {
       return res.status(400).json({
         status: false,
@@ -217,7 +216,6 @@ export const forwardComplaint = async (req, res) => {
       });
     }
 
-    // 2. Fetch Data (Ticket, Current User, Target User)
     const ticket = await Ticket.findById(ticketId);
     if (!ticket) {
       return res.status(404).json({ status: false, message: "Ticket not found" });
@@ -227,34 +225,24 @@ export const forwardComplaint = async (req, res) => {
     if (!currentUser) {
       return res.status(404).json({ status: false, message: RESPONSE_MESSAGES.USER_NOT_FOUND });
     }
-
-    // Check if target user exists
     const targetUser = await User.findOne({ userID: targetUserId });
     
     if (!targetUser) {
       return res.status(404).json({ status: false, message: "Target user not found" });
     }
 
-    // 3. AUTHORIZATION LOGIC (The Core Requirement)
     let isAllowed = false;
 
-    // --- CASE A: ADMIN (Has all power) ---
     if (currentUser.role === USER_ROLES.ADMIN) {
       isAllowed = true;
     }
 
-    // --- CASE B: CONTROLLER ---
     else if (currentUser.role === USER_ROLES.CONTROLLER) {
-      // 1. Own Department BO / Sr Scale / Jr Scale
-      // check if target is in same department AND is a BO/Officer
       const isSameDept = targetUser.department === currentUser.department;
       const isTargetOfficer = targetUser.role === USER_ROLES.OFFICER; 
       
-      // 2. Other Department Control
       const isTargetControl = targetUser.role === USER_ROLES.CONTROLLER;
 
-      // 3. Issue Raiser
-      // We check if targetUser._id matches ticket.raisedBy.id
       const isRaiser = ticket.employeeID === targetUser.userID;
 
       if ((isSameDept && isTargetOfficer) || isTargetControl || isRaiser) {
@@ -262,12 +250,9 @@ export const forwardComplaint = async (req, res) => {
       }
     }
 
-    // --- CASE C: BO (Branch Officer) ---
     else if (currentUser.role === USER_ROLES.OFFICER) {
-      // 1. Above (Admin)
       const isTargetAdmin = targetUser.role === USER_ROLES.ADMIN;
 
-      // 2. Other Department BO (or same dept BO)
       const isTargetBO = targetUser.role === USER_ROLES.OFFICER;
 
       if (isTargetAdmin || isTargetBO) {
