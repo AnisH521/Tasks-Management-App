@@ -83,6 +83,7 @@ export const registerTicket = async (req, res) => {
           category: savedTicket.category,
           department: savedTicket.department,
           employeeName: savedTicket.employeeName,
+          employeeID: currentUser.userID,
           status: savedTicket.status,
           submittedAt: savedTicket.createdAt,
         },
@@ -107,7 +108,6 @@ export const getComplaints = async (req, res) => {
   try {
     const { status, category } = req.body;
 
-    // Get current user from middleware
     const currentUser = await User.findById(req.user.userId);
 
     if (!currentUser) {
@@ -123,6 +123,7 @@ export const getComplaints = async (req, res) => {
     let query = {};
 
     query.department = currentUser.department;
+    query.employeeID = currentUser.userID;
 
     // Apply additional filters
     if (status) query.status = status;
