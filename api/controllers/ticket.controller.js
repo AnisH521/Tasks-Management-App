@@ -17,17 +17,10 @@ export const registerTicket = async (req, res) => {
   try {
     const { category, subCategory, complaintDescription, section } = req.body;
 
-    if (!category || !complaintDescription || !section) {
+    if (!category || !subCategory || !complaintDescription || !section) {
       return res.status(400).json({
         status: false,
         message: RESPONSE_MESSAGES.REQUIRED_FIELDS,
-      });
-    }
-
-    if (!category || !complaintDescription || !section) {
-      return res.status(400).json({
-        status: false,
-        message: "Please provide Category, Description, and Section.",
       });
     }
 
@@ -44,6 +37,17 @@ export const registerTicket = async (req, res) => {
       return res.status(400).json({
         status: false,
         message: "Invalid Category Code.",
+      });
+    }
+
+    const isValidSubCategory = selectedCategory.subcategories.some(
+      (sub) => sub.code === subCategory
+    );
+
+    if (!isValidSubCategory) {
+      return res.status(400).json({
+        status: false,
+        message: `Invalid SubCategory '${subCategory}' for Category '${category}'.`,
       });
     }
 
