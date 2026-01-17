@@ -43,6 +43,11 @@ const ticketSchema = new Schema(
       maxLength: 6000,
     },
 
+    issueImage: {
+      type: String,
+      required: false,
+    },
+
     department: {
       type: String,
       required: true,

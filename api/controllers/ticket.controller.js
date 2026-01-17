@@ -15,7 +15,7 @@ import {
 
 export const registerTicket = async (req, res) => {
   try {
-    const { category, subCategory, complaintDescription, section } = req.body;
+    const { category, subCategory, complaintDescription, section, issueImage } = req.body;
 
     if (!category || !subCategory || !complaintDescription || !section) {
       return res.status(400).json({
@@ -64,6 +64,7 @@ export const registerTicket = async (req, res) => {
       category: category,
       subCategory: subCategory,
       complaintDescription: complaintDescription.trim(),
+      issueImage: issueImage || "",
       department: currentUser.department,
       employeeName: currentUser.name,
       employeeID: currentUser.userID,
@@ -78,15 +79,7 @@ export const registerTicket = async (req, res) => {
       return res.status(201).json({
         status: true,
         message: "Complaint registered successfully",
-        data: {
-          ticketId: savedTicket._id,
-          category: savedTicket.category,
-          department: savedTicket.department,
-          employeeName: savedTicket.employeeName,
-          employeeID: currentUser.userID,
-          status: savedTicket.status,
-          submittedAt: savedTicket.createdAt,
-        },
+        data: newTicket
       });
     } else {
       return res.status(400).json({

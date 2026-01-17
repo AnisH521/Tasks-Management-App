@@ -34,11 +34,13 @@ export const registerUser = async (req, res) => {
       if (isSrDME) idBaseString = `SR_DME_${deptCode}`;
       else if (isSrScale) idBaseString = `${deptCode}_SR_SCALE`;
       else if (isJrScale) idBaseString = `${deptCode}_JR_SCALE`;
-      else idBaseString = `${deptCode}_BO`; // Fallback
     } else if (role === 'Admin') {
        idBaseString = `${deptCode}_ADMIN`;
     } else {
-       idBaseString = `${deptCode}_USER`;
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please provide valid user role.' 
+      });
     }
 
     // Unique ID (Auto-Increment Logic)
