@@ -3,18 +3,18 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import morgan from "morgan";
-import config from 'config';
+import config from "config";
 import { connectDB } from "./util/connectionSetup.js";
 import { errorHandler, routeNotFound } from "./middleware/errorHandler.js";
 import { apiRouter } from "./routes/api.route.js";
 import { userRouter } from "./routes/user.route.js";
 import { ticketRouter } from "./routes/ticket.route.js";
-import { seedDatabaseFromExcel } from "./seeder/databaseSeeder.js";
+// import { seedDatabaseFromExcel } from "./seeder/databaseSeeder.js";
 
 dotenv.config();
 
 connectDB();
-await seedDatabaseFromExcel();
+// await seedDatabaseFromExcel();
 //
 
 // Define the port from environment variables or default to 4000
@@ -33,7 +33,7 @@ app.use(
     methods: config.get("method"),
     allowedHeaders: config.get("headers"),
     credentials: true,
-  })
+  }),
 );
 // Add cookie parser
 app.use(cookieParser());

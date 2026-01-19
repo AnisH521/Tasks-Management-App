@@ -99,7 +99,7 @@ export const registerTicket = async (req, res) => {
 
 export const getComplaints = async (req, res) => {
   try {
-    const { status, category } = req.body;
+    // const { status, category } = req.body;
 
     const currentUser = await User.findById(req.user.userId);
 
@@ -119,8 +119,8 @@ export const getComplaints = async (req, res) => {
     query.employeeID = currentUser.userID;
 
     // Apply additional filters
-    if (status) query.status = status;
-    if (category) query.category = category;
+    // if (status) query.status = status;
+    // if (category) query.category = category;
 
     const complaints = await Ticket.find(query)
       .sort({ createdAt: -1 });

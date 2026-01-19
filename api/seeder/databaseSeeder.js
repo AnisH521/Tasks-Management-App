@@ -76,7 +76,7 @@ export const seedDatabaseFromExcel = async () => {
       /* ---------- Ticket ---------- */
 
       tickets.push({
-        category: row["Category"],
+        category: row["CATEGORY"],
         subCategory: row["Sub Category"],
         complaintDescription: row["Complaint Description"],
         train_NO: row["Train No"],
