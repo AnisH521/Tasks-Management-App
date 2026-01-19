@@ -21,7 +21,7 @@ const replySchema = new Schema(
       default: Date.now,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const ticketSchema = new Schema(
@@ -43,7 +43,7 @@ const ticketSchema = new Schema(
       maxLength: 6000,
     },
 
-    issueImage: {
+    train_NO: {
       type: String,
       required: false,
     },
@@ -69,9 +69,9 @@ const ticketSchema = new Schema(
     },
 
     section: {
-        type: String,
-        required: false,
-      },
+      type: String,
+      required: false,
+    },
 
     status: {
       type: String,
@@ -82,7 +82,7 @@ const ticketSchema = new Schema(
       type: String,
       required: false,
       trim: true,
-      maxLength: 1000,
+      maxLength: 20000,
     },
     replies: {
       type: [replySchema],
@@ -91,7 +91,7 @@ const ticketSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const Ticket = mongoose.model("Ticket", ticketSchema);

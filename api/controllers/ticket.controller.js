@@ -15,7 +15,7 @@ import {
 
 export const registerTicket = async (req, res) => {
   try {
-    const { category, subCategory, complaintDescription, section, issueImage } = req.body;
+    const { category, subCategory, complaintDescription, section, train_NO } = req.body;
 
     if (!category || !subCategory || !complaintDescription || !section) {
       return res.status(400).json({
@@ -64,7 +64,7 @@ export const registerTicket = async (req, res) => {
       category: category,
       subCategory: subCategory,
       complaintDescription: complaintDescription.trim(),
-      issueImage: issueImage || "",
+      train_NO: train_NO || "",
       department: currentUser.department,
       employeeName: currentUser.name,
       employeeID: currentUser.userID,

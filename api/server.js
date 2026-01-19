@@ -9,12 +9,12 @@ import { errorHandler, routeNotFound } from "./middleware/errorHandler.js";
 import { apiRouter } from "./routes/api.route.js";
 import { userRouter } from "./routes/user.route.js";
 import { ticketRouter } from "./routes/ticket.route.js";
-import { seedDatabase } from "./seeder/databaseSeeder.js";
+import { seedDatabaseFromExcel } from "./seeder/databaseSeeder.js";
 
 dotenv.config();
 
 connectDB();
-// await seedDatabase();
+await seedDatabaseFromExcel();
 //
 
 // Define the port from environment variables or default to 4000
