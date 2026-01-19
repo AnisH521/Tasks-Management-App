@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import morgan from "morgan";
-import config from 'config';
+import config from "config";
 import { connectDB } from "./util/connectionSetup.js";
 import { errorHandler, routeNotFound } from "./middleware/errorHandler.js";
 import { apiRouter } from "./routes/api.route.js";
@@ -33,7 +33,7 @@ app.use(
     methods: config.get("method"),
     allowedHeaders: config.get("headers"),
     credentials: true,
-  })
+  }),
 );
 // Add cookie parser
 app.use(cookieParser());

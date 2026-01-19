@@ -346,3 +346,35 @@
     font-size: 0.9rem;
   }
 }
+
+/* ===== Responsive Sidebar ===== */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: -240px; /* hidden */
+    top: 0;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+  }
+
+  /* When sidebar is open */
+  .sidebar.open {
+    left: 0;
+  }
+}
+
+/* Overlay for mobile */
+.sidebar-overlay {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: block;
+  }
+}

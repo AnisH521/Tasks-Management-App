@@ -49,7 +49,9 @@ function IssueList() {
   }, [filter, categoryFilter]);
 
   const filteredIssues = issues.filter((issue) =>
-    issue.complaintDescription?.toLowerCase().includes(searchTerm.toLowerCase())
+    issue.complaintDescription
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase()),
   );
 
   const getStatusClass = (status) => {

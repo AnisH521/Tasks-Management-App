@@ -15,7 +15,7 @@ export const ticketRouter = express.Router();
 
 ticketRouter.route("/register").post(protectedRoute, registerTicket);
 
-ticketRouter.route("/get-all").get(protectedRoute, getComplaints);
+ticketRouter.route("/get-all").post(protectedRoute, getComplaints);
 
 ticketRouter.route("/get/:ticketId").get(protectedRoute, getTicketById);
 
