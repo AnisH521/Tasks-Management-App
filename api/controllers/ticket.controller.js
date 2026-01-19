@@ -5,8 +5,6 @@ import { getEndUserDashboard } from "../services/dashboard.service.js";
 import { RESPONSE_MESSAGES } from "../constant/responseMessage.js";
 import {
   USER_ROLES,
-  VALID_DEPARTMENTS,
-  VALIDATION_MESSAGES,
 } from "../constant/userMessage.js";
 import {
   DETENTION_CATEGORIES,
@@ -15,29 +13,17 @@ import {
   VALID_STATUSES,
 } from "../constant/ticketMessage.js";
 
-// Controller to register a new ticket
-// This function handles the registration of a new ticket by an end user
 export const registerTicket = async (req, res) => {
   try {
-    const { category, subCategory, complaintDescription, section } = req.body;
+    const { category, subCategory, complaintDescription, section, issueImage } = req.body;
 
-    // Validate required fields
-    if (!category || !complaintDescription || !section) {
+    if (!category || !subCategory || !complaintDescription || !section) {
       return res.status(400).json({
         status: false,
         message: RESPONSE_MESSAGES.REQUIRED_FIELDS,
       });
     }
 
-        // 1. Validate required fields
-    if (!category || !complaintDescription || !section) {
-      return res.status(400).json({
-        status: false,
-        message: "Please provide Category, Description, and Section.",
-      });
-    }
-
-    // 2. Validate Section
     if (!SECTIONS.includes(section)) {
         return res.status(400).json({
             status: false,
@@ -45,7 +31,6 @@ export const registerTicket = async (req, res) => {
         });
     }
 
-    // 3. Validate Category & Subcategory logic
     const selectedCategory = DETENTION_CATEGORIES[category];
     
     if (!selectedCategory) {
@@ -55,7 +40,17 @@ export const registerTicket = async (req, res) => {
       });
     }
 
-    // Get current user from middleware
+    const isValidSubCategory = selectedCategory.subcategories.some(
+      (sub) => sub.code === subCategory
+    );
+
+    if (!isValidSubCategory) {
+      return res.status(400).json({
+        status: false,
+        message: `Invalid SubCategory '${subCategory}' for Category '${category}'.`,
+      });
+    }
+
     const currentUser = await User.findById(req.user.userId);
 
     if (!currentUser) {
@@ -65,11 +60,11 @@ export const registerTicket = async (req, res) => {
       });
     }
 
-    // Create new ticket
     const newTicket = new Ticket({
       category: category,
       subCategory: subCategory,
       complaintDescription: complaintDescription.trim(),
+      issueImage: issueImage || "",
       department: currentUser.department,
       employeeName: currentUser.name,
       employeeID: currentUser.userID,
@@ -78,21 +73,13 @@ export const registerTicket = async (req, res) => {
       status: "open",
     });
 
-    // Save ticket to database
     const savedTicket = await newTicket.save();
 
     if (savedTicket) {
       return res.status(201).json({
         status: true,
         message: "Complaint registered successfully",
-        data: {
-          ticketId: savedTicket._id,
-          category: savedTicket.category,
-          department: savedTicket.department,
-          employeeName: savedTicket.employeeName,
-          status: savedTicket.status,
-          submittedAt: savedTicket.createdAt,
-        },
+        data: newTicket
       });
     } else {
       return res.status(400).json({
@@ -114,7 +101,6 @@ export const getComplaints = async (req, res) => {
   try {
     const { status, category } = req.body;
 
-    // Get current user from middleware
     const currentUser = await User.findById(req.user.userId);
 
     if (!currentUser) {
@@ -130,6 +116,7 @@ export const getComplaints = async (req, res) => {
     let query = {};
 
     query.department = currentUser.department;
+    query.employeeID = currentUser.userID;
 
     // Apply additional filters
     if (status) query.status = status;
@@ -208,7 +195,6 @@ export const forwardComplaint = async (req, res) => {
   try {
     const { ticketId, targetUserId} = req.body; 
 
-    // 1. Basic Validation
     if (!targetUserId) {
       return res.status(400).json({
         status: false,
@@ -223,7 +209,6 @@ export const forwardComplaint = async (req, res) => {
       });
     }
 
-    // 2. Fetch Data (Ticket, Current User, Target User)
     const ticket = await Ticket.findById(ticketId);
     if (!ticket) {
       return res.status(404).json({ status: false, message: "Ticket not found" });
@@ -233,34 +218,24 @@ export const forwardComplaint = async (req, res) => {
     if (!currentUser) {
       return res.status(404).json({ status: false, message: RESPONSE_MESSAGES.USER_NOT_FOUND });
     }
-
-    // Check if target user exists
     const targetUser = await User.findOne({ userID: targetUserId });
     
     if (!targetUser) {
       return res.status(404).json({ status: false, message: "Target user not found" });
     }
 
-    // 3. AUTHORIZATION LOGIC (The Core Requirement)
     let isAllowed = false;
 
-    // --- CASE A: ADMIN (Has all power) ---
     if (currentUser.role === USER_ROLES.ADMIN) {
       isAllowed = true;
     }
 
-    // --- CASE B: CONTROLLER ---
     else if (currentUser.role === USER_ROLES.CONTROLLER) {
-      // 1. Own Department BO / Sr Scale / Jr Scale
-      // check if target is in same department AND is a BO/Officer
       const isSameDept = targetUser.department === currentUser.department;
       const isTargetOfficer = targetUser.role === USER_ROLES.OFFICER; 
       
-      // 2. Other Department Control
       const isTargetControl = targetUser.role === USER_ROLES.CONTROLLER;
 
-      // 3. Issue Raiser
-      // We check if targetUser._id matches ticket.raisedBy.id
       const isRaiser = ticket.employeeID === targetUser.userID;
 
       if ((isSameDept && isTargetOfficer) || isTargetControl || isRaiser) {
@@ -268,12 +243,9 @@ export const forwardComplaint = async (req, res) => {
       }
     }
 
-    // --- CASE C: BO (Branch Officer) ---
     else if (currentUser.role === USER_ROLES.OFFICER) {
-      // 1. Above (Admin)
       const isTargetAdmin = targetUser.role === USER_ROLES.ADMIN;
 
-      // 2. Other Department BO (or same dept BO)
       const isTargetBO = targetUser.role === USER_ROLES.OFFICER;
 
       if (isTargetAdmin || isTargetBO) {
@@ -289,8 +261,6 @@ export const forwardComplaint = async (req, res) => {
       });
     }
 
-    // 5. Perform the Forward Action
-    // Update ticket assigned user/department/status
     ticket.assignedUser = targetUser.role;
     ticket.department = targetUser.department;
     ticket.status = TICKET_STATUSES.FORWARDED;

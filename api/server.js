@@ -9,7 +9,6 @@ import { errorHandler, routeNotFound } from "./middleware/errorHandler.js";
 import { apiRouter } from "./routes/api.route.js";
 import { userRouter } from "./routes/user.route.js";
 import { ticketRouter } from "./routes/ticket.route.js";
-import { locationRouter } from "./routes/location.route.js";
 import { seedDatabase } from "./seeder/databaseSeeder.js";
 
 dotenv.config();
@@ -52,7 +51,6 @@ app.use(morgan("dev"));
 app.use("/api/v1", apiRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/tickets", ticketRouter);
-app.use("/api/v1/locations", locationRouter);
 
 /**
  * Global Error Handler
