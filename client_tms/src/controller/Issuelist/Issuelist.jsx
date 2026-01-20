@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-const API_BASE_URL = "http://localhost:5000";
+import { API_BASE_URL } from "../../config/config";
 import { useState } from "react";
 import { FaFilter } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "./Register.css";
+import { API_BASE_URL } from "../../config/config";
 
 import {
   getMainCategories,
@@ -10,8 +11,6 @@ import {
 } from "../../constants/ticketMessage";
 
 import "./Register.css";
-
-const API_URL = "http://localhost:5000";
 
 function Register() {
   const [category, setCategory] = useState("");
@@ -56,7 +55,7 @@ function Register() {
     };
 
     try {
-      const response = await fetch(`${API_URL}/api/v1/tickets/register`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/tickets/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

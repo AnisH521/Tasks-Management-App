@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Navbar.css";
-
-const base_url = "localhost";
-const port = "5000";
+import { API_BASE_URL } from "../../../config/config";
 
 function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -25,7 +23,7 @@ function Navbar() {
   const handleLogout = async () => {
     try {
       await axios.post(
-        `http://${base_url}:${port}/api/v1/users/logout`,
+        `${API_BASE_URL}/api/v1/users/logout`,
         {},
         { withCredentials: true },
       );

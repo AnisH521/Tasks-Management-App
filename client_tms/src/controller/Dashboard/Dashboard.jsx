@@ -13,8 +13,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import "./Dashboard.css";
-
-const API_BASE_URL = "http://localhost:5000";
+import { API_BASE_URL } from "../../config/config";
 
 const COLORS = ["#2563eb", "#16a34a", "#ca8a04", "#dc2626", "#6b7280"];
 
