@@ -4,11 +4,9 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom"; // import for redirection
 import "./Login.css";
+import { API_BASE_URL } from "../../../config/config";
 
-const base_url = "localhost";
-const port = "5000";
-const API = `http://${base_url}:${port}/api/v1/users`;
-
+const API = `${API_BASE_URL}/api/v1/users`;
 function Login() {
   const [isFlipped, setIsFlipped] = useState(false);
 
@@ -45,7 +43,7 @@ function Login() {
           userID: loginUserID,
           password: loginPassword,
         },
-        { withCredentials: true } // IMPORTANT
+        { withCredentials: true }, // IMPORTANT
       );
 
       localStorage.setItem("isLoggedIn", "true");
@@ -74,7 +72,6 @@ function Login() {
     try {
       let isSrScaleFlag = false;
       let isJrScaleFlag = false;
-      let isSrDMEFlag = false;
 
       // Normalize role for backend
       let normalizedRole = "";
@@ -86,7 +83,6 @@ function Login() {
       if (normalizedRole === "Officer") {
         isSrScaleFlag = scale === "Sr Scale";
         isJrScaleFlag = scale === "Jr Scale";
-        isSrDMEFlag = scale === "Sr DME";
       }
 
       const res = await axios.post(`${API}/register`, {
