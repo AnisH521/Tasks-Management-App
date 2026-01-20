@@ -10,7 +10,7 @@ const replySchema = new Schema(
       type: String,
       required: true,
       trim: true,
-      maxLength: 1000,
+      maxLength: 9000,
     },
     senderRole: {
       type: String,
@@ -77,12 +77,6 @@ const ticketSchema = new Schema(
       type: String,
       enum: ["open", "forwarded", "closed", "rejected"],
       default: "open",
-    },
-    message: {
-      type: String,
-      required: false,
-      trim: true,
-      maxLength: 20000,
     },
     replies: {
       type: [replySchema],

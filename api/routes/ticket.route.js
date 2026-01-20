@@ -1,10 +1,10 @@
 import express from "express";
 import { isSICRoute, protectedRoute } from "../middleware/authMiddleware.js";
 import {
+  addReplyToTicket,
   deleteTicket,
   forwardComplaint,
   getComplaints,
-  getDashboardData,
   getTicketById,
   registerTicket,
   updateTicketStatus,
@@ -23,8 +23,8 @@ ticketRouter.route("/update/:ticketId").put(protectedRoute, updateTicketStatus);
 
 ticketRouter.route("/forward").put(protectedRoute, forwardComplaint);
 
+ticketRouter.route("/add-remarks").post(protectedRoute, addReplyToTicket)
+
 ticketRouter
   .route("/delete/:ticketId")
   .delete(protectedRoute, isSICRoute, deleteTicket);
-
-ticketRouter.route("/dashboard").get(protectedRoute, getDashboardData);

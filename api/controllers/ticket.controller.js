@@ -1,11 +1,8 @@
 import mongoose from "mongoose";
 import { Ticket } from "../models/ticket.model.js";
 import { User } from "../models/user.model.js";
-import { getEndUserDashboard } from "../services/dashboard.service.js";
 import { RESPONSE_MESSAGES } from "../constant/responseMessage.js";
-import {
-  USER_ROLES,
-} from "../constant/userMessage.js";
+import { USER_ROLES } from "../constant/userMessage.js";
 import {
   DETENTION_CATEGORIES,
   SECTIONS,
@@ -15,7 +12,8 @@ import {
 
 export const registerTicket = async (req, res) => {
   try {
-    const { category, subCategory, complaintDescription, section, train_NO } = req.body;
+    const { category, subCategory, complaintDescription, section, train_NO } =
+      req.body;
 
     if (!category || !subCategory || !complaintDescription || !section) {
       return res.status(400).json({
@@ -25,14 +23,14 @@ export const registerTicket = async (req, res) => {
     }
 
     if (!SECTIONS.includes(section)) {
-        return res.status(400).json({
-            status: false,
-            message: "Invalid Section provided.",
-        });
+      return res.status(400).json({
+        status: false,
+        message: "Invalid Section provided.",
+      });
     }
 
     const selectedCategory = DETENTION_CATEGORIES[category];
-    
+
     if (!selectedCategory) {
       return res.status(400).json({
         status: false,
@@ -41,7 +39,7 @@ export const registerTicket = async (req, res) => {
     }
 
     const isValidSubCategory = selectedCategory.subcategories.some(
-      (sub) => sub.code === subCategory
+      (sub) => sub.code === subCategory,
     );
 
     if (!isValidSubCategory) {
@@ -60,6 +58,20 @@ export const registerTicket = async (req, res) => {
       });
     }
 
+    // find a controller in the same department
+    // if no controller found, return error
+    const controller = await User.findOne({
+      department: currentUser.department,
+      role: USER_ROLES.CONTROLLER,
+    });
+
+    if (!controller) {
+      return res.status(404).json({
+        status: false,
+        message: `No controller found in department ${currentUser.department}.`,
+      });
+    }
+
     const newTicket = new Ticket({
       category: category,
       subCategory: subCategory,
@@ -68,7 +80,7 @@ export const registerTicket = async (req, res) => {
       department: currentUser.department,
       employeeName: currentUser.name,
       employeeID: currentUser.userID,
-      assignedUser: USER_ROLES.CONTROLLER,
+      assignedUser: controller.userID,
       section: section || "",
       status: "open",
     });
@@ -79,7 +91,7 @@ export const registerTicket = async (req, res) => {
       return res.status(201).json({
         status: true,
         message: "Complaint registered successfully",
-        data: newTicket
+        data: newTicket,
       });
     } else {
       return res.status(400).json({
@@ -116,14 +128,13 @@ export const getComplaints = async (req, res) => {
     let query = {};
 
     query.department = currentUser.department;
-    query.employeeID = currentUser.userID;
+    query.assignedUser = currentUser.userID;
 
     // Apply additional filters
     if (status) query.status = status;
     if (category) query.category = category;
 
-    const complaints = await Ticket.find(query)
-      .sort({ createdAt: -1 });
+    const complaints = await Ticket.find(query).sort({ createdAt: -1 });
 
     const totalCount = await Ticket.countDocuments(query);
 
@@ -193,7 +204,7 @@ export const getTicketById = async (req, res) => {
 
 export const forwardComplaint = async (req, res) => {
   try {
-    const { ticketId, targetUserId} = req.body; 
+    const { ticketId, targetUserId } = req.body;
 
     if (!targetUserId) {
       return res.status(400).json({
@@ -211,29 +222,33 @@ export const forwardComplaint = async (req, res) => {
 
     const ticket = await Ticket.findById(ticketId);
     if (!ticket) {
-      return res.status(404).json({ status: false, message: "Ticket not found" });
+      return res
+        .status(404)
+        .json({ status: false, message: "Ticket not found" });
     }
 
     const currentUser = await User.findById(req.user.userId);
     if (!currentUser) {
-      return res.status(404).json({ status: false, message: RESPONSE_MESSAGES.USER_NOT_FOUND });
+      return res
+        .status(404)
+        .json({ status: false, message: RESPONSE_MESSAGES.USER_NOT_FOUND });
     }
     const targetUser = await User.findOne({ userID: targetUserId });
-    
+
     if (!targetUser) {
-      return res.status(404).json({ status: false, message: "Target user not found" });
+      return res
+        .status(404)
+        .json({ status: false, message: "Target user not found" });
     }
 
     let isAllowed = false;
 
     if (currentUser.role === USER_ROLES.ADMIN) {
       isAllowed = true;
-    }
-
-    else if (currentUser.role === USER_ROLES.CONTROLLER) {
+    } else if (currentUser.role === USER_ROLES.CONTROLLER) {
       const isSameDept = targetUser.department === currentUser.department;
-      const isTargetOfficer = targetUser.role === USER_ROLES.OFFICER; 
-      
+      const isTargetOfficer = targetUser.role === USER_ROLES.OFFICER;
+
       const isTargetControl = targetUser.role === USER_ROLES.CONTROLLER;
 
       const isRaiser = ticket.employeeID === targetUser.userID;
@@ -241,9 +256,7 @@ export const forwardComplaint = async (req, res) => {
       if ((isSameDept && isTargetOfficer) || isTargetControl || isRaiser) {
         isAllowed = true;
       }
-    }
-
-    else if (currentUser.role === USER_ROLES.OFFICER) {
+    } else if (currentUser.role === USER_ROLES.OFFICER) {
       const isTargetAdmin = targetUser.role === USER_ROLES.ADMIN;
 
       const isTargetBO = targetUser.role === USER_ROLES.OFFICER;
@@ -261,7 +274,7 @@ export const forwardComplaint = async (req, res) => {
       });
     }
 
-    ticket.assignedUser = targetUser.role;
+    ticket.assignedUser = targetUser.userID;
     ticket.department = targetUser.department;
     ticket.status = TICKET_STATUSES.FORWARDED;
 
@@ -274,10 +287,9 @@ export const forwardComplaint = async (req, res) => {
         ticketId: ticket._id,
         assignedTo: targetUser.username,
         department: ticket.department,
-        status: ticket.status
+        status: ticket.status,
       },
     });
-
   } catch (error) {
     console.error("Error forwarding ticket:", error);
     return res.status(500).json({
@@ -290,7 +302,7 @@ export const forwardComplaint = async (req, res) => {
 export const updateTicketStatus = async (req, res) => {
   try {
     const { ticketId } = req.params;
-    const { message, status } = req.body;
+    const { status } = req.body;
 
     // Validate if ID is a valid MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(ticketId)) {
@@ -322,18 +334,6 @@ export const updateTicketStatus = async (req, res) => {
       updateFields.status = status;
     }
 
-    // Validate and add message if provided
-    if (message !== undefined) {
-      // Validate message length
-      if (message && message.trim().length > 1000) {
-        return res.status(400).json({
-          status: false,
-          message: "Message cannot exceed 1000 characters",
-        });
-      }
-      updateFields.message = message ? message.trim() : "";
-    }
-
     // Add updatedAt timestamp
     updateFields.updatedAt = new Date();
 
@@ -341,7 +341,7 @@ export const updateTicketStatus = async (req, res) => {
     const updatedTicket = await Ticket.findByIdAndUpdate(
       ticketId,
       updateFields,
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!updatedTicket) {
@@ -374,7 +374,7 @@ export const updateTicketStatus = async (req, res) => {
 
 export const addReplyToTicket = async (req, res) => {
   try {
-    const { ticketId, sender, message, senderRole } = req.body;
+    const { ticketId, message } = req.body;
 
     // Validate required fields
     if (!ticketId) {
@@ -384,15 +384,17 @@ export const addReplyToTicket = async (req, res) => {
       });
     }
 
-    if (!sender || !message || !senderRole) {
+    if (!message) {
       return res.status(400).json({
         status: false,
-        message: "Sender, message, and senderRole are required",
+        message: "Message is required",
       });
     }
 
     // Find the ticket
+    // Find current user
     const ticket = await Ticket.findById(ticketId);
+    const currentUser = await User.findById(req.user.userId);
 
     if (!ticket) {
       return res.status(404).json({
@@ -403,9 +405,9 @@ export const addReplyToTicket = async (req, res) => {
 
     // Create a new reply
     const newReply = {
-      sender,
-      message,
-      senderRole,
+      sender: currentUser.userID,
+      message: message,
+      senderRole: currentUser.role,
       timestamp: new Date(),
     };
 
@@ -457,51 +459,6 @@ export const deleteTicket = async (req, res) => {
     });
   } catch (error) {
     console.error("Error deleting ticket:", error);
-    return res.status(500).json({
-      status: false,
-      message: RESPONSE_MESSAGES.INTERNAL_ERROR,
-    });
-  }
-};
-
-export const getDashboardData = async (req, res) => {
-  try {
-    // Get current user from middleware
-    const currentUser = await User.findById(req.user.userId);
-
-    if (!currentUser) {
-      return res.status(404).json({
-        status: false,
-        message: RESPONSE_MESSAGES.USER_NOT_FOUND,
-      });
-    }
-
-    let dashboardData = {};
-
-    // Build query based on user department
-    let baseQuery = {};
-    baseQuery.department = currentUser.department;
-    dashboardData = await getEndUserDashboard(baseQuery, currentUser);
-
-    return res.status(200).json({
-      status: true,
-      message: RESPONSE_MESSAGES.DASHBOARD_RETRIEVED,
-      data: {
-        userInfo: {
-          name: `${currentUser.name} ${currentUser.surname}`,
-          email: currentUser.email,
-          role: currentUser.role,
-          department: currentUser.department,
-          isAdmin: currentUser.isAdmin,
-          isJAG: currentUser.isJAG,
-          isASTOfficer: currentUser.isASTOfficer,
-          isSIC: currentUser.isSIC,
-        },
-        ...dashboardData,
-      },
-    });
-  } catch (error) {
-    console.error(RESPONSE_MESSAGES.DASHBOARD_ERROR, error);
     return res.status(500).json({
       status: false,
       message: RESPONSE_MESSAGES.INTERNAL_ERROR,
