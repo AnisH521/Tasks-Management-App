@@ -30,16 +30,18 @@ export const USER_ROLES = {
 
 export const deptPrefixMap = {
     'Mechanical (C & W)': 'MECH',
-    'Mechanical (D & DM)': 'MECH_D',
+    'Mechanical (D & DM)': 'MECH_D_DM',
     'Engineering': 'ENG',
     'Electrical/TRS': 'ELEC_TRS',
     'Electrical/TRD': 'ELEC_TRD',
     'Electrical/OP': 'ELEC_OP',
     'Electrical/Genl': 'ELEC_GEN',
-    'Signal and Telecom': 'S&T',
+    'Signal and Telecom': 'ST',
     'Commercial': 'COM',
     'Operating': 'OPT',
     'Administration': 'ADM',
+    'Railway Protection Force': 'RPF',
+    'Store': 'STORE',
   };
 
 // Arrays for validation

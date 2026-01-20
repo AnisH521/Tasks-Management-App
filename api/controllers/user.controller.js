@@ -7,18 +7,18 @@ export const registerUser = async (req, res) => {
   try {
     const { 
       name, 
+      phoneNO,
       department, 
       password, 
       role, 
       isSrScale, 
       isJrScale, 
-      isSrDME 
     } = req.body;
 
-    if (!name || !department || !password || !role) {
+    if (!name || !phoneNO || !department || !password || !role) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Please provide name, department, password, and role.' 
+        message: 'Please provide name, phone number, department, password, and role.' 
       });
     }
 
@@ -31,8 +31,7 @@ export const registerUser = async (req, res) => {
     } else if (role === 'Controller') {
       idBaseString = `${deptCode}_CONTROL`; 
     } else if (role === 'Officer') {
-      if (isSrDME) idBaseString = `SR_DME_${deptCode}`;
-      else if (isSrScale) idBaseString = `${deptCode}_SR_SCALE`;
+      if (isSrScale) idBaseString = `${deptCode}_SR_SCALE`;
       else if (isJrScale) idBaseString = `${deptCode}_JR_SCALE`;
     } else if (role === 'Admin') {
        idBaseString = `${deptCode}_ADMIN`;
@@ -67,13 +66,13 @@ export const registerUser = async (req, res) => {
 
     const newUser = new User({
       name,
+      phoneNO,
       department,
       userID: finalUserId,
       password,
       role,
       isSrScale: isSrScale || false,
       isJrScale: isJrScale || false,
-      isSrDME: isSrDME || false
     });
 
     const savedUser = await newUser.save();

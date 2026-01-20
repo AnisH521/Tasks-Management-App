@@ -8,6 +8,10 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    phoneNO: {
+      type: String,
+      required: true,
+    },
     department: {
       type: String,
       required: true,
@@ -27,20 +31,16 @@ const userSchema = new Schema(
     },
     isSrScale: {
       type: Boolean,
-      default: false,     
-    },
-    isJrScale: {
-      type: Boolean,  
       default: false,
     },
-    isSrDME: {
+    isJrScale: {
       type: Boolean,
       default: false,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 userSchema.pre("save", async function (next) {
@@ -56,7 +56,7 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.matchPassword = async function (candidatePassword) {
-    return await bcrypt.compare(candidatePassword, this.password);
-}
+  return await bcrypt.compare(candidatePassword, this.password);
+};
 
 export const User = mongoose.model("User", userSchema);
