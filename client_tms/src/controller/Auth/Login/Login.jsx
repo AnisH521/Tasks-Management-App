@@ -92,7 +92,6 @@ function Login() {
         role: normalizedRole,
         isSrScale: isSrScaleFlag,
         isJrScale: isJrScaleFlag,
-        isSrDME: isSrDMEFlag,
       });
 
       toast.info(`User Registered! ID: ${res.data.user.userID}`, {

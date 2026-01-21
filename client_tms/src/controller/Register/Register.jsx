@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { toast } from "react-toastify";
 import "./Register.css";
 import { API_BASE_URL } from "../../config/config";
@@ -10,8 +9,6 @@ import {
   SECTIONS,
 } from "../../constants/ticketMessage";
 
-import "./Register.css";
-
 function Register() {
   const [category, setCategory] = useState("");
   const [subCategory, setSubCategory] = useState("");
@@ -20,6 +17,9 @@ function Register() {
   const [train_NO, setTrainNumber] = useState("");
 
   const [subCategoryList, setSubCategoryList] = useState([]);
+
+  // 🔹 Image state
+  const [images, setImages] = useState([]);
 
   // Load subcategories when category changes
   useEffect(() => {
@@ -30,6 +30,20 @@ function Register() {
       setSubCategoryList([]);
     }
   }, [category]);
+
+  // 🔹 Image upload handler
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    const newImages = files.slice(0, 4 - images.length);
+    const imagePreviews = newImages.map((file) => URL.createObjectURL(file));
+    setImages([...images, ...imagePreviews]);
+  };
+
+  // 🔹 Remove image
+  const removeImage = (index) => {
+    const updatedImages = images.filter((_, i) => i !== index);
+    setImages(updatedImages);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,7 +59,6 @@ function Register() {
       return;
     }
 
-    // API Payload in the required format
     const payload = {
       category,
       subCategory,
@@ -64,87 +77,114 @@ function Register() {
 
       const data = await response.json();
 
-      console.log("🚀 Response Data:", data);
-
       if (data.status) {
         toast.success(data.message || "Complaint registered successfully");
-        // Reset all fields after success
+
+        // Reset form
         setCategory("");
         setSubCategory("");
         setSection("");
         setComplaintDescription("");
         setTrainNumber("");
         setSubCategoryList([]);
+        setImages([]);
       } else {
         toast.error(data.message || "Something went wrong");
       }
     } catch (error) {
-      console.error("Error submitting issue:", error);
       toast.error("Error submitting issue. Please try again.");
     }
   };
 
   return (
-    <>
-      <div className="register-container">
-        <h2>Register Complaint</h2>
+    <div className="register-container">
+      <h2>Register Complaint</h2>
 
-        <form onSubmit={handleSubmit}>
-          {/* CATEGORY */}
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option value="">Select Category</option>
-            {getMainCategories().map((cat) => (
-              <option key={cat.code} value={cat.code}>
-                {cat.code} - {cat.description}
-              </option>
+      <form onSubmit={handleSubmit}>
+        {/* CATEGORY */}
+        <select value={category} onChange={(e) => setCategory(e.target.value)}>
+          <option value="">Select Category</option>
+          {getMainCategories().map((cat) => (
+            <option key={cat.code} value={cat.code}>
+              {cat.code} - {cat.description}
+            </option>
+          ))}
+        </select>
+
+        {/* SUB CATEGORY */}
+        <select
+          value={subCategory}
+          onChange={(e) => setSubCategory(e.target.value)}
+          disabled={!category}
+        >
+          <option value="">Select Sub Category</option>
+          {subCategoryList.map((sub) => (
+            <option key={sub.code} value={sub.code}>
+              {sub.code} - {sub.description}
+            </option>
+          ))}
+        </select>
+
+        {/* SECTION */}
+        <select value={section} onChange={(e) => setSection(e.target.value)}>
+          <option value="">Select Section</option>
+          {SECTIONS.map((sec) => (
+            <option key={sec} value={sec}>
+              {sec}
+            </option>
+          ))}
+        </select>
+
+        {/* TRAIN NO */}
+        <textarea
+          placeholder="Train No"
+          value={train_NO}
+          onChange={(e) => setTrainNumber(e.target.value)}
+        />
+
+        {/* DESCRIPTION */}
+        <textarea
+          placeholder="Complaint Description"
+          value={complaintDescription}
+          onChange={(e) => setComplaintDescription(e.target.value)}
+        />
+
+        {/* 🔹 IMAGE UPLOAD */}
+        <div className="form-group">
+          <label>Upload Images (Max 4)</label>
+
+          <div className="image-upload-container">
+            {images.map((img, index) => (
+              <div className="image-slot" key={index}>
+                <img src={img} alt={`upload-${index}`} />
+                <button
+                  type="button"
+                  className="remove-btn"
+                  onClick={() => removeImage(index)}
+                >
+                  ×
+                </button>
+              </div>
             ))}
-          </select>
 
-          {/* SUB CATEGORY */}
-          <select
-            value={subCategory}
-            onChange={(e) => setSubCategory(e.target.value)}
-            disabled={!category}
-          >
-            <option value="">Select Sub Category</option>
-            {subCategoryList.map((sub) => (
-              <option key={sub.code} value={sub.code}>
-                {sub.code} - {sub.description}
-              </option>
-            ))}
-          </select>
+            {images.length < 4 && (
+              <div className="image-slot add-slot">
+                <label htmlFor="imageUpload">+</label>
+                <input
+                  id="imageUpload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  style={{ display: "none" }}
+                />
+              </div>
+            )}
+          </div>
+        </div>
 
-          {/* SECTION */}
-          <select value={section} onChange={(e) => setSection(e.target.value)}>
-            <option value="">Select Section</option>
-            {SECTIONS.map((sec) => (
-              <option key={sec} value={sec}>
-                {sec}
-              </option>
-            ))}
-          </select>
-
-          {/* TRAIN NO */}
-          <textarea
-            placeholder="Train No"
-            value={train_NO}
-            onChange={(e) => setTrainNumber(e.target.value)}
-          />
-
-          {/* DESCRIPTION */}
-          <textarea
-            placeholder="Complaint Description"
-            value={complaintDescription}
-            onChange={(e) => setComplaintDescription(e.target.value)}
-          />
-
-          <button type="submit">Submit</button>
-        </form>
-      </div>
-    </>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
   );
 }
 
