@@ -2,20 +2,22 @@ import React, { useState } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom"; // import for redirection
+import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import { API_BASE_URL } from "../../../config/config";
 
 const API = `${API_BASE_URL}/api/v1/users`;
+
 function Login() {
   const [isFlipped, setIsFlipped] = useState(false);
 
-  // Login state
+  // -------- LOGIN STATE --------
   const [loginUserID, setLoginUserID] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
-  // Register state
+  // -------- REGISTER STATE --------
   const [name, setName] = useState("");
+  const [phoneNO, setPhoneNO] = useState("");
   const [department, setDepartment] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
@@ -23,15 +25,15 @@ function Login() {
 
   const [error, setError] = useState("");
 
-  const navigate = useNavigate(); // hook for navigation
+  const navigate = useNavigate();
 
-  // ----- FLIP HANDLER -----
+  // -------- FLIP HANDLER --------
   const handleFlip = (flip) => {
     setIsFlipped(flip);
-    setError(""); // clear error on flip
+    setError("");
   };
 
-  // ----- LOGIN HANDLER -----
+  // -------- LOGIN HANDLER --------
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -43,28 +45,23 @@ function Login() {
           userID: loginUserID,
           password: loginPassword,
         },
-        { withCredentials: true }, // IMPORTANT
+        { withCredentials: true },
       );
 
       localStorage.setItem("isLoggedIn", "true");
-
       localStorage.setItem("user", JSON.stringify(res.data));
 
       toast.success(`Welcome ${res.data.name || res.data.userID}`);
       navigate("/dashboard");
 
-      // Clear login inputs
       setLoginUserID("");
       setLoginPassword("");
-
-      // Redirect to Dashboard
-      navigate("/dashboard"); // Make sure this route exists
     } catch (err) {
       setError(err.response?.data?.message || "Login failed.");
     }
   };
 
-  // ----- REGISTER HANDLER -----
+  // -------- REGISTER HANDLER --------
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
@@ -73,13 +70,12 @@ function Login() {
       let isSrScaleFlag = false;
       let isJrScaleFlag = false;
 
-      // Normalize role for backend
-      let normalizedRole = "";
+      let normalizedRole = role;
+
       if (role === "Officer / BO") normalizedRole = "Officer";
       else if (role === "Supervisor/End User") normalizedRole = "Supervisor";
       else if (role === "Controller") normalizedRole = "Controller";
 
-      // Only Officer / BO can have scale options
       if (normalizedRole === "Officer") {
         isSrScaleFlag = scale === "Sr Scale";
         isJrScaleFlag = scale === "Jr Scale";
@@ -87,6 +83,7 @@ function Login() {
 
       const res = await axios.post(`${API}/register`, {
         name,
+        phoneNO,
         department,
         password,
         role: normalizedRole,
@@ -95,21 +92,34 @@ function Login() {
       });
 
       toast.info(`User Registered! ID: ${res.data.user.userID}`, {
-        position: "top-right",
-        autoClose: false, // stay until user closes
-        closeOnClick: true,
-        draggable: true,
+        autoClose: false,
       });
 
-      // Reset register form
+      // Reset form
       setName("");
+      setPhoneNO("");
       setDepartment("");
       setPassword("");
       setRole("");
       setScale("");
-      handleFlip(false); // back to login
+
+      handleFlip(false);
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed.");
+    }
+  };
+
+  // -------- DEPARTMENT CHANGE HANDLER --------
+  const handleDepartmentChange = (e) => {
+    const selectedDept = e.target.value;
+    setDepartment(selectedDept);
+
+    if (selectedDept === "Administration") {
+      setRole("Admin");
+      setScale("");
+    } else {
+      setRole("");
+      setScale("");
     }
   };
 
@@ -125,7 +135,6 @@ function Login() {
 
             <input
               placeholder="User ID"
-              type="text"
               value={loginUserID}
               onChange={(e) => setLoginUserID(e.target.value)}
             />
@@ -153,15 +162,19 @@ function Login() {
 
             <input
               placeholder="Name"
-              type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
 
-            <select
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-            >
+            <input
+              placeholder="Phone Number"
+              type="tel"
+              maxLength={10}
+              value={phoneNO}
+              onChange={(e) => setPhoneNO(e.target.value.replace(/\D/g, ""))}
+            />
+
+            <select value={department} onChange={handleDepartmentChange}>
               <option value="">Select Department</option>
               <option>Administration</option>
               <option>Operating</option>
@@ -190,17 +203,28 @@ function Login() {
               onChange={(e) => setPassword(e.target.value)}
             />
 
+            {/* ROLE DROPDOWN (Admin hidden) */}
             <select
               value={role}
               onChange={(e) => {
                 setRole(e.target.value);
                 setScale("");
               }}
+              disabled={department === "Administration"}
             >
-              <option value="">Select Role</option>
-              <option>Officer / BO</option>
-              <option>Supervisor/End User</option>
-              <option>Controller</option>
+              <option value="">
+                {department === "Administration"
+                  ? "Admin (Auto Selected)"
+                  : "Select Role"}
+              </option>
+
+              {department !== "Administration" && (
+                <>
+                  <option>Officer / BO</option>
+                  <option>Supervisor/End User</option>
+                  <option>Controller</option>
+                </>
+              )}
             </select>
 
             {role === "Officer / BO" && (
@@ -212,7 +236,7 @@ function Login() {
                     value="Sr Scale"
                     checked={scale === "Sr Scale"}
                     onChange={(e) => setScale(e.target.value)}
-                  />{" "}
+                  />
                   Sr Scale
                 </label>
 
@@ -223,19 +247,8 @@ function Login() {
                     value="Jr Scale"
                     checked={scale === "Jr Scale"}
                     onChange={(e) => setScale(e.target.value)}
-                  />{" "}
+                  />
                   Jr Scale
-                </label>
-
-                <label className="checkbox">
-                  <input
-                    type="radio"
-                    name="scale"
-                    value="Sr DME"
-                    checked={scale === "Sr DME"}
-                    onChange={(e) => setScale(e.target.value)}
-                  />{" "}
-                  Sr DME
                 </label>
               </div>
             )}

@@ -1,6 +1,6 @@
- 
+/* CONTAINER */
 .login-container {
-  height: 100vh;   /* 🔥 IMPORTANT */
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -8,14 +8,14 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  overflow: hidden; /* prevent scrolling */
 }
-
 
 /* FLIP CARD */
 .flip-card {
   width: 360px;
   perspective: 1200px;
-  margin-top: -500px;
+  margin-top: -400px;
 }
 
 .flip-card-inner {
@@ -37,7 +37,7 @@
   backface-visibility: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center; /* center everything horizontally */
+  align-items: center;
   box-sizing: border-box;
 }
 
@@ -47,61 +47,57 @@
 
 /* CARD */
 .login {
-  background: rgba(44, 44, 44, 0.5); /* 80% transparent */
-  border: #fff 2px solid ;
-  padding: 40px 30px;
+  background: rgba(44, 44, 44, 0.5);
+  border: 2px solid #fff;
+  padding: 30px 26px;
   border-radius: 17px;
   color: #fff;
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
+  box-sizing: border-box;
 }
 
 /* TITLE */
 .h1 {
-  margin-bottom: 25px;
-  font-size: 1.4em;
+  margin-bottom: 16px;
+  font-size: 1.35em;
   font-weight: 700;
   text-align: center;
   width: 100%;
 }
 
-/* INPUTS & DROPDOWNS */
-.login input[type="text"],
-.login input[type="password"],
+/* INPUTS / SELECT / BUTTON – COMPACT & CONSISTENT */
+.login input,
+.login select,
 .btn {
   width: 100%;
-  max-width: 320px; /* ensure it fits nicely */
-  height: 48px;
-  margin-bottom: 18px;
-  padding: 0 18px;
+  max-width: 320px;
+  height: 46px;
+  margin-bottom: 12px; /* compact spacing */
+  padding: 0 16px;
   border-radius: 100px;
   border: none;
   background: #3c3c3c;
   color: #fff;
-  font-size: 0.9em;
+  font-size: 0.88em;
   outline: none;
   box-sizing: border-box;
   text-align: left;
 }
 
+/* SELECT */
 .login select {
-  width: 100%;
-  max-width: 320px;
-  height: 48px;
-  margin-bottom: 15px;
-  padding: 0 18px;
-  padding-right: 40px; /* extra space for down arrow */
-  border-radius: 100px;
-  border: none;
-  background: #3c3c3c;
-  color: #fff;
-  font-size: 0.9em;
-  outline: none;
-  appearance: none; /* remove default arrow for custom styling */
+  padding-right: 36px;
+  appearance: none;
   cursor: pointer;
-  position: relative;
+}
+
+/* DISABLED SELECT */
+.login select:disabled {
+  background: #2a2a2a;
+  color: #bbb;
+  cursor: not-allowed;
 }
 
 /* BUTTON */
@@ -119,7 +115,7 @@
 
 /* TEXT */
 p {
-  margin-top: 20px;
+  margin-top: 6px;
   font-size: 0.75em;
   text-align: center;
   width: 100%;
@@ -131,27 +127,30 @@ p span {
   font-weight: 600;
 }
 
-/* RADIO/SCALING OPTIONS */
+/* SCALE OPTIONS – HORIZONTAL & COMPACT */
 .scale-options {
-  margin-bottom: 15px;
+  margin: -4px 0 6px 0;
   width: 100%;
   max-width: 320px;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .scale-options .checkbox {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 0.85em;
-  margin-bottom: 8px;
+  gap: 3px;
+  font-size: 0.72em;
+  white-space: nowrap;
+  margin: 0;
 }
 
-/* CHECKBOX */
+/* RADIO */
 .checkbox input[type="radio"] {
-  accent-color: #00ddeb; /* nice theme color for radio */
+  accent-color: #00ddeb;
+  transform: scale(0.85);
+  margin: 0;
 }
 
 /* MOBILE */
@@ -161,17 +160,17 @@ p span {
   }
 
   .login {
-    padding: 30px 20px;
+    padding: 24px 18px;
   }
 
-  .login input[type="text"],
-  .login input[type="password"],
+  .login input,
   .login select,
   .btn {
     max-width: 100%;
   }
 
   .scale-options {
-    max-width: 100%;
+    flex-wrap: wrap;
+    gap: 6px;
   }
 }
