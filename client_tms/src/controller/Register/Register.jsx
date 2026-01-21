@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import "./Register.css";
 import { API_BASE_URL } from "../../config/config";
@@ -21,6 +21,9 @@ function Register() {
   // 🔹 Image state
   const [images, setImages] = useState([]);
 
+  // 🔹 Ref for file input
+  const fileInputRef = useRef(null);
+
   // Load subcategories when category changes
   useEffect(() => {
     if (category) {
@@ -37,12 +40,20 @@ function Register() {
     const newImages = files.slice(0, 4 - images.length);
     const imagePreviews = newImages.map((file) => URL.createObjectURL(file));
     setImages([...images, ...imagePreviews]);
+    e.target.value = null; // Reset input
   };
 
   // 🔹 Remove image
   const removeImage = (index) => {
     const updatedImages = images.filter((_, i) => i !== index);
     setImages(updatedImages);
+  };
+
+  // 🔹 Trigger file input when clicking an image slot
+  const handleSlotClick = () => {
+    if (images.length < 4 && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -155,12 +166,15 @@ function Register() {
 
           <div className="image-upload-container">
             {images.map((img, index) => (
-              <div className="image-slot" key={index}>
+              <div className="image-slot" key={index} onClick={handleSlotClick}>
                 <img src={img} alt={`upload-${index}`} />
                 <button
                   type="button"
                   className="remove-btn"
-                  onClick={() => removeImage(index)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // prevent triggering file input
+                    removeImage(index);
+                  }}
                 >
                   ×
                 </button>
@@ -168,18 +182,20 @@ function Register() {
             ))}
 
             {images.length < 4 && (
-              <div className="image-slot add-slot">
-                <label htmlFor="imageUpload">+</label>
-                <input
-                  id="imageUpload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  style={{ display: "none" }}
-                />
+              <div className="image-slot add-slot" onClick={handleSlotClick}>
+                <label>+</label>
               </div>
             )}
           </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageChange}
+            style={{ display: "none" }}
+          />
         </div>
 
         <button type="submit">Submit</button>

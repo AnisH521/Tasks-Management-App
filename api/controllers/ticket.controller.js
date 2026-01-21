@@ -204,6 +204,9 @@ export const getTicketById = async (req, res) => {
 
 export const forwardComplaint = async (req, res) => {
   try {
+    console.log("REQ USER:", req.user);
+    console.log("BODY:", req.body);
+
     const { ticketId, targetUserId } = req.body;
 
     if (!targetUserId) {
