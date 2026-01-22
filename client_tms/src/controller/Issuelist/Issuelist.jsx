@@ -21,6 +21,13 @@ function Issuelist() {
   const [forwardLoading, setForwardLoading] = useState(false);
   const [forwardError, setForwardError] = useState("");
 
+  // Reply modal
+  const [showReplyModal, setShowReplyModal] = useState(false);
+  const [replyTicketId, setReplyTicketId] = useState("");
+  const [replyMessage, setReplyMessage] = useState("");
+  const [replyLoading, setReplyLoading] = useState(false);
+  const [replyError, setReplyError] = useState("");
+
   /* ================= FETCH ISSUE LIST ================= */
   useEffect(() => {
     const fetchIssues = async () => {
@@ -112,6 +119,56 @@ function Issuelist() {
     }
   };
 
+  /* ================= REPLY HANDLER ================= */
+  const handleReply = async () => {
+    if (!replyMessage) {
+      setReplyError("Reply message is required");
+      return;
+    }
+
+    try {
+      setReplyLoading(true);
+      setReplyError("");
+
+      const res = await fetch(`${API_BASE_URL}/api/v1/tickets/add-remarks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          ticketId: replyTicketId,
+          message: replyMessage,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!data.status) {
+        setReplyError(data.message || "Something went wrong");
+        return;
+      }
+
+      // update the issue timeline in UI
+      setIssues((prev) =>
+        prev.map((i) =>
+          i._id === replyTicketId
+            ? {
+                ...i,
+                replies: [...(i.replies || []), data.data],
+              }
+            : i,
+        ),
+      );
+
+      toast.success(data.message || "Reply added successfully");
+      setShowReplyModal(false);
+      setReplyMessage("");
+    } catch (err) {
+      setReplyError("Something went wrong");
+    } finally {
+      setReplyLoading(false);
+    }
+  };
+
   /* ================= STATUS CLASS ================= */
   const getStatusClass = (status) => {
     switch (status?.toLowerCase()) {
@@ -133,6 +190,7 @@ function Issuelist() {
 
   return (
     <div className="issue-container">
+      <ToastContainer />
       <h2>All Issue List</h2>
 
       {/* ================= TABLE ================= */}
@@ -163,6 +221,7 @@ function Issuelist() {
                 <td className={getStatusClass(issue.status)}>{issue.status}</td>
 
                 <td>
+                  {/* Forward Button */}
                   <button
                     className="forward-btn"
                     onClick={(e) => {
@@ -170,7 +229,7 @@ function Issuelist() {
                       setForwardTicketId(issue._id);
                       setShowForwardModal(true);
                     }}
-                    disabled={issue.status === "forwarded"} // <-- disable if forwarded
+                    disabled={issue.status === "forwarded"}
                     style={{
                       cursor:
                         issue.status === "forwarded"
@@ -180,6 +239,18 @@ function Issuelist() {
                     }}
                   >
                     {issue.status === "forwarded" ? "Forwarded" : "Forward"}
+                  </button>
+
+                  {/* Reply Button */}
+                  <button
+                    className="reply-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setReplyTicketId(issue._id);
+                      setShowReplyModal(true);
+                    }}
+                  >
+                    Reply
                   </button>
                 </td>
               </tr>
@@ -298,6 +369,48 @@ function Issuelist() {
                 disabled={forwardLoading}
               >
                 {forwardLoading ? "Forwarding..." : "Forward"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= REPLY MODAL ================= */}
+      {showReplyModal && (
+        <div className="modal-overlay">
+          <div className="modal-card small">
+            <h3>Reply to Ticket</h3>
+
+            <div className="form-group">
+              <label>Ticket ID</label>
+              <input value={replyTicketId} disabled />
+            </div>
+
+            <div className="form-group">
+              <label>Message</label>
+              <textarea
+                value={replyMessage}
+                onChange={(e) => setReplyMessage(e.target.value)}
+                placeholder="Enter your reply"
+              />
+            </div>
+
+            {replyError && <p className="error-text">{replyError}</p>}
+
+            <div className="modal-actions">
+              <button
+                className="btn-secondary"
+                onClick={() => setShowReplyModal(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="btn-primary"
+                onClick={handleReply}
+                disabled={replyLoading}
+              >
+                {replyLoading ? "Sending..." : "Send Reply"}
               </button>
             </div>
           </div>
