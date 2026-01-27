@@ -1,6 +1,6 @@
 {
   "app": {
-    "port": 5000
+    "port": 5050
   },
   "jwt": {
     "access_token_secret": "ghdsjwsvhacjgkswvaiegkjsv",
@@ -23,6 +23,14 @@
       "http://localhost:7000"
     ]
   },
-  "method": ["GET", "POST", "PUT", "DELETE"],
-  "headers": ["Content-Type", "Authorization"]
+  "method": [
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE"
+  ],
+  "headers": [
+    "Content-Type",
+    "Authorization"
+  ]
 }

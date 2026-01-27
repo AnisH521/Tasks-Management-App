@@ -162,7 +162,7 @@ function Register() {
 
         {/* 🔹 IMAGE UPLOAD */}
         <div className="form-group">
-          <label>Upload Images (Max 4)</label>
+          <label>Upload Images</label>
 
           <div className="image-upload-container">
             {images.map((img, index) => (
@@ -181,7 +181,7 @@ function Register() {
               </div>
             ))}
 
-            {images.length < 4 && (
+            {images.length < 40 && (
               <div className="image-slot add-slot" onClick={handleSlotClick}>
                 <label>+</label>
               </div>
