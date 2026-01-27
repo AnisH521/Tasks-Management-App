@@ -2,43 +2,40 @@ import { User } from "../models/user.model.js";
 import { createJWT } from "../util/createJWT.js";
 import { RESPONSE_MESSAGES } from "../constant/responseMessage.js";
 import { deptPrefixMap, USER_ROLES } from "../constant/userMessage.js";
+import { Ticket } from "../models/ticket.model.js";
+import mongoose from "mongoose";
 
 export const registerUser = async (req, res) => {
   try {
-    const { 
-      name, 
-      phoneNO,
-      department, 
-      password, 
-      role, 
-      isSrScale, 
-      isJrScale, 
-    } = req.body;
+    const { name, phoneNO, department, password, role, isSrScale, isJrScale } =
+      req.body;
 
     if (!name || !phoneNO || !department || !password || !role) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Please provide name, phone number, department, password, and role.' 
+      return res.status(400).json({
+        success: false,
+        message:
+          "Please provide name, phone number, department, password, and role.",
       });
     }
 
-    const deptCode = deptPrefixMap[department] || department.substring(0, 4).toUpperCase();
+    const deptCode =
+      deptPrefixMap[department] || department.substring(0, 4).toUpperCase();
 
-    let idBaseString = '';
+    let idBaseString = "";
 
-    if (role === 'Supervisor') {
+    if (role === "Supervisor") {
       idBaseString = `${deptCode}_SUP`;
-    } else if (role === 'Controller') {
-      idBaseString = `${deptCode}_CONTROL`; 
-    } else if (role === 'Officer') {
+    } else if (role === "Controller") {
+      idBaseString = `${deptCode}_CONTROL`;
+    } else if (role === "Officer") {
       if (isSrScale) idBaseString = `${deptCode}_SR_SCALE`;
       else if (isJrScale) idBaseString = `${deptCode}_JR_SCALE`;
-    } else if (role === 'Admin') {
-       idBaseString = `${deptCode}_ADMIN`;
+    } else if (role === "Admin") {
+      idBaseString = `${deptCode}_ADMIN`;
     } else {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Please provide valid user role.' 
+      return res.status(400).json({
+        success: false,
+        message: "Please provide valid user role.",
       });
     }
 
@@ -46,11 +43,11 @@ export const registerUser = async (req, res) => {
     // search for the latest user with this base string to determine the next number
     // Regex to find IDs starting with base string: ^MECH_SUP_(\d+)$
     const regex = new RegExp(`^${idBaseString}_(\\d+)$`);
-    
+
     // Find the user with the highest number in this category
     const lastUser = await User.findOne({ userID: regex })
       .sort({ createdAt: -1 })
-      .select('userID');
+      .select("userID");
 
     let nextNumber = 1;
     if (lastUser) {
@@ -80,7 +77,7 @@ export const registerUser = async (req, res) => {
     if (savedUser) {
       createJWT(res, savedUser._id);
       savedUser.password = undefined;
-      
+
       return res.status(201).json({
         message: RESPONSE_MESSAGES.USER_REGISTERED,
         user: savedUser,
@@ -90,12 +87,11 @@ export const registerUser = async (req, res) => {
         .status(400)
         .json({ message: RESPONSE_MESSAGES.INTERNAL_ERROR });
     }
-
   } catch (error) {
-    console.error('Registration Error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Server Error during registration' 
+    console.error("Registration Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error during registration",
     });
   }
 };
@@ -166,14 +162,118 @@ export const getUserById = async (req, res) => {
   }
 };
 
+export const getForwardableUsers = async (req, res) => {
+  try {
+    const { ticketId } = req.body;
+
+    // 1. Validate Ticket ID if provided
+    if (!ticketId || !mongoose.Types.ObjectId.isValid(ticketId)) {
+      return res.status(400).json({
+        status: false,
+        message: "Valid Ticket ID is required to determine forwardable users.",
+      });
+    }
+
+    // 2. Fetch Current User & Ticket
+    const currentUser = await User.findById(req.user.userId);
+    const ticket = await Ticket.findById(ticketId);
+
+    if (!currentUser) {
+      return res
+        .status(404)
+        .json({ status: false, message: RESPONSE_MESSAGES.USER_NOT_FOUND });
+    }
+    if (!ticket) {
+      return res
+        .status(404)
+        .json({ status: false, message: "Ticket not found" });
+    }
+
+    let query = {};
+
+    // 3. Build Query Based on Role Logic
+    // Admin can forward to anyone (except themselves usually, but logic allows all)
+    if (currentUser.role === USER_ROLES.ADMIN) {
+      query = { _id: { $ne: currentUser._id } };
+    }
+
+    // Logic:
+    // A. Officers in SAME Department
+    // B. Controllers in ANY Department
+    // C. The Issue Raiser (Specific User)
+    else if (currentUser.role === USER_ROLES.CONTROLLER) {
+      const raiserUserID = ticket.employeeID;
+
+      query = {
+        $or: [
+          // A. Same Dept Officers
+          {
+            department: currentUser.department,
+            role: USER_ROLES.OFFICER,
+          },
+          // B. Any Dept Controllers (excluding self)
+          {
+            role: USER_ROLES.CONTROLLER,
+            _id: { $ne: currentUser._id },
+          },
+          // C. The Issue Raiser
+          {
+            userID: raiserUserID,
+          },
+        ],
+      };
+    }
+
+    // Logic:
+    // A. Admins
+    // B. Other Officers (Any Dept)
+    else if (currentUser.role === USER_ROLES.OFFICER) {
+      query = {
+        $or: [
+          { role: USER_ROLES.ADMIN },
+          {
+            role: USER_ROLES.OFFICER,
+            _id: { $ne: currentUser._id }, // Exclude self
+          },
+        ],
+      };
+    } else {
+      // Supervisors or others usually can't forward, return empty or error
+      return res.status(403).json({
+        status: false,
+        message: "You do not have permission to forward tickets.",
+      });
+    }
+
+    // 4. Execute Query
+    // Alphabetical order
+    const users = await User.find(query)
+      .select("name userID role department designation")
+      .sort({ name: 1 }); 
+
+    return res.status(200).json({
+      status: true,
+      message: "List of users you can forward to.",
+      count: users.length,
+      data: users,
+    });
+  } catch (error) {
+    console.error("Error fetching forwardable users:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 export const getAllOfficers = async (req, res) => {
   try {
     const { department, isSrDME, isSrScale, isJrScale } = req.body;
 
     // Build the Query Object
     // Start by filtering for the correct Role (Branch Officer)
-    let query = { 
-      role: USER_ROLES.OFFICER // Ensure this matches your enum for 'BO'
+    let query = {
+      role: USER_ROLES.OFFICER, // Ensure this matches your enum for 'BO'
     };
 
     // Filter by Department (Required or Optional depending on your logic)
@@ -183,16 +283,16 @@ export const getAllOfficers = async (req, res) => {
 
     // Conditional Filtering for Specific Ranks
     // If any of these flags are true in the request query, add them to the filter.
-    
-    if (isSrDME === 'true') {
+
+    if (isSrDME === "true") {
       query.isSrDME = true;
     }
-    
-    if (isSrScale === 'true') {
+
+    if (isSrScale === "true") {
       query.isSrScale = true;
     }
-    
-    if (isJrScale === 'true') {
+
+    if (isJrScale === "true") {
       query.isJrScale = true;
     }
 
@@ -214,7 +314,6 @@ export const getAllOfficers = async (req, res) => {
       count: officers.length,
       data: officers,
     });
-
   } catch (error) {
     console.error("Error fetching officers:", error);
     return res.status(500).json({
@@ -229,8 +328,8 @@ export const getAllSupervisors = async (req, res) => {
     const { department } = req.body;
 
     //  SUPERVISOR role
-    let query = { 
-      role: USER_ROLES.SUPERVISOR // Ensure this matches your enum for Supervisor
+    let query = {
+      role: USER_ROLES.SUPERVISOR, // Ensure this matches your enum for Supervisor
     };
 
     // Department Filter
@@ -254,7 +353,6 @@ export const getAllSupervisors = async (req, res) => {
       count: supervisors.length,
       data: supervisors,
     });
-
   } catch (error) {
     console.error("Error fetching supervisors:", error);
     return res.status(500).json({
@@ -269,8 +367,8 @@ export const getAllControlUsers = async (req, res) => {
     const { department } = req.body;
 
     //  CONTROLLER role
-    let query = { 
-      role: USER_ROLES.CONTROLLER
+    let query = {
+      role: USER_ROLES.CONTROLLER,
     };
 
     // Department Filter
@@ -294,7 +392,6 @@ export const getAllControlUsers = async (req, res) => {
       count: controllers.length,
       data: controllers,
     });
-
   } catch (error) {
     console.error("Error fetching control users:", error);
     return res.status(500).json({

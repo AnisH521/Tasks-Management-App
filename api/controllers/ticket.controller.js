@@ -109,6 +109,7 @@ export const registerTicket = async (req, res) => {
   }
 };
 
+// controller that can be used to get complaints assigned to the user
 export const getComplaints = async (req, res) => {
   try {
     const { status, category } = req.body;
@@ -145,6 +146,48 @@ export const getComplaints = async (req, res) => {
       data: complaints,
       userInfo: {
         email: currentUser.email,
+        role: currentUser.role,
+        department: currentUser.department,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching user complaints:", error);
+    return res.status(500).json({
+      status: false,
+      message: RESPONSE_MESSAGES.INTERNAL_ERROR,
+    });
+  }
+};
+
+// controller that can be used to get complaints registered by the user
+export const getComplaintsWhoRegistered = async (req, res) => {
+  try {
+
+    const currentUser = await User.findById(req.user.userId);
+
+    if (!currentUser) {
+      return res.status(404).json({
+        status: false,
+        message: RESPONSE_MESSAGES.USER_NOT_FOUND,
+      });
+    }
+
+    // Build query based on user role
+    let query = {};
+
+    query.employeeName = currentUser.name;
+    query.employeeID = currentUser.userID;
+
+    const complaints = await Ticket.find(query).sort({ createdAt: -1 });
+
+    const totalCount = await Ticket.countDocuments(query);
+
+    return res.status(200).json({
+      status: true,
+      message: RESPONSE_MESSAGES.COMPLAINT_RETRIEVED,
+      totalCount: totalCount,
+      data: complaints,
+      userInfo: {
         role: currentUser.role,
         department: currentUser.department,
       },

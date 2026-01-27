@@ -5,6 +5,7 @@ import {
   deleteTicket,
   forwardComplaint,
   getComplaints,
+  getComplaintsWhoRegistered,
   getTicketById,
   registerTicket,
   updateTicketStatus,
@@ -16,6 +17,8 @@ export const ticketRouter = express.Router();
 ticketRouter.route("/register").post(protectedRoute, registerTicket);
 
 ticketRouter.route("/get-all").post(protectedRoute, getComplaints);
+
+ticketRouter.route("/get-registered-complaints").get(protectedRoute, getComplaintsWhoRegistered);
 
 ticketRouter.route("/get/:ticketId").get(protectedRoute, getTicketById);
 
