@@ -30,7 +30,7 @@ userRouter
 userRouter.route("/getAllSupervisors").get(protectedRoute, getAllSupervisors);
 userRouter.route("/getAllControlUsers").get(protectedRoute, getAllControlUsers);
 
-userRouter.route("/getForwardableUsers").get(protectedRoute, getForwardableUsers);
+userRouter.route("/getForwardableUsers").post(protectedRoute, getForwardableUsers);
 
 userRouter.route("/getUserById").get(protectedRoute, getUserById);
 

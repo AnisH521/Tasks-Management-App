@@ -30,7 +30,15 @@ function Sidebar() {
             isActive ? "menu-item active" : "menu-item"
           }
         >
-          Issue List
+          Received Issue List
+        </NavLink>
+        <NavLink
+          to="/raised-issue-list"
+          className={({ isActive }) =>
+            isActive ? "menu-item active" : "menu-item"
+          }
+        >
+          Raised Issue List
         </NavLink>
       </nav>
     </aside>

@@ -28,6 +28,10 @@ function Issuelist() {
   const [replyLoading, setReplyLoading] = useState(false);
   const [replyError, setReplyError] = useState("");
 
+  // Close ticket
+  const [closeLoading, setCloseLoading] = useState(false);
+  const [closeError, setCloseError] = useState("");
+
   /* ================= FETCH ISSUE LIST ================= */
   useEffect(() => {
     const fetchIssues = async () => {
@@ -169,6 +173,47 @@ function Issuelist() {
     }
   };
 
+  /* ================= CLOSE HANDLER ================= */
+  const handleCloseTicket = async (ticketId) => {
+    try {
+      setCloseLoading(true);
+      setCloseError("");
+
+      const res = await fetch(
+        `${API_BASE_URL}/api/v1/tickets/update/${ticketId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ status: "closed" }),
+        },
+      );
+
+      const data = await res.json();
+
+      if (!data.status) {
+        setCloseError(data.message || "Failed to close ticket");
+        return;
+      }
+
+      toast.success("Ticket closed successfully");
+
+      // Update status in table
+      setIssues((prev) =>
+        prev.map((i) => (i._id === ticketId ? { ...i, status: "closed" } : i)),
+      );
+
+      // Update selected issue if modal is open
+      if (selectedIssue?._id === ticketId) {
+        setSelectedIssue((prev) => ({ ...prev, status: "closed" }));
+      }
+    } catch {
+      setCloseError("Something went wrong");
+    } finally {
+      setCloseLoading(false);
+    }
+  };
+
   /* ================= STATUS CLASS ================= */
   const getStatusClass = (status) => {
     switch (status?.toLowerCase()) {
@@ -229,16 +274,27 @@ function Issuelist() {
                       setForwardTicketId(issue._id);
                       setShowForwardModal(true);
                     }}
-                    disabled={issue.status === "forwarded"}
+                    disabled={
+                      issue.status === "forwarded" || issue.status === "closed"
+                    }
                     style={{
                       cursor:
-                        issue.status === "forwarded"
+                        issue.status === "forwarded" ||
+                        issue.status === "closed"
                           ? "not-allowed"
                           : "pointer",
-                      opacity: issue.status === "forwarded" ? 0.6 : 1,
+                      opacity:
+                        issue.status === "forwarded" ||
+                        issue.status === "closed"
+                          ? 0.6
+                          : 1,
                     }}
                   >
-                    {issue.status === "forwarded" ? "Forwarded" : "Forward"}
+                    {issue.status === "forwarded"
+                      ? "Forwarded"
+                      : issue.status === "closed"
+                        ? "Closed"
+                        : "Forward"}
                   </button>
 
                   {/* Reply Button */}
@@ -249,8 +305,31 @@ function Issuelist() {
                       setReplyTicketId(issue._id);
                       setShowReplyModal(true);
                     }}
+                    disabled={issue.status === "closed"}
+                    style={{
+                      cursor:
+                        issue.status === "closed" ? "not-allowed" : "pointer",
+                      opacity: issue.status === "closed" ? 0.6 : 1,
+                    }}
                   >
                     Reply
+                  </button>
+
+                  {/* Close Button */}
+                  <button
+                    className="close-ticket-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCloseTicket(issue._id);
+                    }}
+                    disabled={issue.status === "closed" || closeLoading}
+                    style={{
+                      cursor:
+                        issue.status === "closed" ? "not-allowed" : "pointer",
+                      opacity: issue.status === "closed" ? 0.6 : 1,
+                    }}
+                  >
+                    {issue.status === "closed" ? "Closed" : "Close"}
                   </button>
                 </td>
               </tr>
@@ -263,7 +342,10 @@ function Issuelist() {
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-card">
-            <button className="close-btn" onClick={() => setShowModal(false)}>
+            <button
+              className="close-modal-btn"
+              onClick={() => setShowModal(false)}
+            >
               ✕
             </button>
 

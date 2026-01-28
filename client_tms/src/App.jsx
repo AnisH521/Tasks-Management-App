@@ -9,6 +9,7 @@ import Register from "./controller/Register/Register.jsx";
 import ProtectedRoute from "./controller/Auth/Login/ProtectedRoute.jsx";
 import MainLayout from "./controller/layout/MainLayout/MainLayout.jsx";
 import IssueList from "./controller/Issuelist/Issuelist.jsx";
+import RaisedIssueList from "./controller/RaisedIssueList/RaisedIssueList.jsx";
 
 function App() {
   return (
@@ -44,6 +45,16 @@ function App() {
             <ProtectedRoute>
               <MainLayout>
                 <IssueList />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/raised-issue-list"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <RaisedIssueList />
               </MainLayout>
             </ProtectedRoute>
           }

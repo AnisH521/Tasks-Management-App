@@ -263,7 +263,7 @@
   position: relative;
 }
 
-.close-btn {
+.close-modal-btn {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -339,7 +339,8 @@
 }
 
 .forward-btn,
-.reply-btn {
+.reply-btn,
+.close-ticket-btn {
   width: 80px; /* same width for both */
   padding: 6px 12px;
   border: none;
@@ -379,6 +380,19 @@
   border-radius: 6px;
 }
 
+ 
+.form-group textarea {
+  width: 100%;
+  min-height: 180px;   
+  padding: 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -406,6 +420,51 @@
   color: #dc2626;
   font-size: 13px;
 }
+
+/* CLOSE TICKET BUTTON */
+.close-ticket-btn {
+  background: #dc3545;
+}
+
+.close-ticket-btn:hover {
+  background: #b52a37;
+}
+
+/* MODAL CLOSE (✕) BUTTON */
+.close-modal-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* MODAL SIZES */
+.modal-card.small {
+  width: 400px;
+}
+
+.modal-card.large {
+  width: 700px;
+  max-height: 85vh;
+}
+
+/* REPLY TEXTAREA */
+.modal-card.large textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  resize: vertical;
+}
+
+ 
+
+
 
 
 /* ===== Animations ===== */
