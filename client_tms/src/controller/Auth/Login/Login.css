@@ -8,14 +8,15 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  overflow: hidden; /* prevent scrolling */
+  overflow: hidden;
+  /* prevent scrolling */
 }
 
 /* FLIP CARD */
 .flip-card {
   width: 360px;
   perspective: 1200px;
-  margin-top: -400px;
+  margin-top: -20px;
 }
 
 .flip-card-inner {
@@ -74,7 +75,8 @@
   width: 100%;
   max-width: 320px;
   height: 46px;
-  margin-bottom: 12px; /* compact spacing */
+  margin-bottom: 12px;
+  /* compact spacing */
   padding: 0 16px;
   border-radius: 100px;
   border: none;
