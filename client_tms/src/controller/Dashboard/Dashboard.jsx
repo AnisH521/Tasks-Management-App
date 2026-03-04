@@ -146,16 +146,23 @@ function Dashboard() {
       </div>
 
       {/* embedded advanced report iframe */}
-      <div className="iframe-container" style={{ marginTop: "2rem" }}>
-        <div className="iframe-wrapper">
-          <iframe
-            src="https://lookerstudio.google.com/embed/reporting/b3cb54ae-579a-483f-bf1a-3e28c32368d7/page/htnY"
-            title="Advanced Report"
-            frameBorder="0"
-            style={{ border: 0 }}
-            allowFullScreen
-            sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-          ></iframe>
+      <div className="report-section">
+        <div className="report-card">
+          <div className="report-header">
+            <h2>📊 Advanced Analytics Dashboard</h2>
+            <p>Real-time issue insights & performance metrics</p>
+          </div>
+
+          <div className="iframe-wrapper">
+            <iframe
+              src="https://lookerstudio.google.com/embed/reporting/b3cb54ae-579a-483f-bf1a-3e28c32368d7/page/htnY"
+              title="Advanced Report"
+              width="100%"
+              height="650"
+              style={{ border: "none", borderRadius: "12px" }}
+              allowFullScreen
+            />
+          </div>
         </div>
       </div>
     </div>
