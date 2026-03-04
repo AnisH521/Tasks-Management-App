@@ -63,10 +63,9 @@ function Dashboard() {
 
   return (
     <div className="dashboard-container">
-      <h2>Issue Monitoring Dashboard</h2>
-
+      {/* <h2>Issue Monitoring Dashboard</h2> */}
       {/* ===== Summary Cards ===== */}
-      <div className="stats-grid">
+      {/* <div className="stats-grid">
         <div className="stat-card">
           <h2>Total Issues</h2>
           <p>{issues.length}</p>
@@ -79,12 +78,12 @@ function Dashboard() {
           <h2>Closed</h2>
           <p>{issues.filter((i) => i.status === "closed").length}</p>
         </div>
-      </div>
+      </div> */}
 
       {/* ===== Charts ===== */}
       <div className="chart-grid">
         {/* Status Pie */}
-        <div className="chart-card">
+        {/* <div className="chart-card">
           <h3>Issues by Status</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -103,10 +102,10 @@ function Dashboard() {
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </div> */}
 
         {/* Category Pie */}
-        <div className="chart-card">
+        {/* <div className="chart-card">
           <h3>Issues by Category</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -125,10 +124,10 @@ function Dashboard() {
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </div> */}
 
         {/* Bar Chart */}
-        <div className="chart-card full">
+        {/* <div className="chart-card full">
           <h3>Category-wise Issue Count</h3>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={categoryData}>
@@ -143,6 +142,20 @@ function Dashboard() {
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+        </div> */}
+      </div>
+
+      {/* embedded advanced report iframe */}
+      <div className="iframe-container" style={{ marginTop: "2rem" }}>
+        <div className="iframe-wrapper">
+          <iframe
+            src="https://lookerstudio.google.com/embed/reporting/b3cb54ae-579a-483f-bf1a-3e28c32368d7/page/htnY"
+            title="Advanced Report"
+            frameBorder="0"
+            style={{ border: 0 }}
+            allowFullScreen
+            sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+          ></iframe>
         </div>
       </div>
     </div>
