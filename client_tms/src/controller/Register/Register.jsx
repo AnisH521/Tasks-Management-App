@@ -148,7 +148,8 @@ function Register() {
 
         {/* TRAIN NO */}
         <textarea
-          placeholder="Train No"
+          // placeholder="Train No"
+          placeholder="Failure Items (e.g. Train No, Wagon No, Engine No, Point, Must No etc.)"
           value={train_NO}
           onChange={(e) => setTrainNumber(e.target.value)}
         />
