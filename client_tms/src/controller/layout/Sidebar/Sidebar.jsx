@@ -1,47 +1,61 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
 
 function Sidebar() {
+  const [open, setOpen] = useState(false);
+
   return (
-    <aside className="sidebar">
-      <nav className="sidebar-menu">
-        <NavLink
-          to="/dashboard"
-          className={({ isActive }) =>
-            isActive ? "menu-item active" : "menu-item"
-          }
-        >
-          Dashboard
-        </NavLink>
+    <>
+      {/* Mobile Toggle Button */}
+      <button className="menu-toggle" onClick={() => setOpen(!open)}>
+        ☰
+      </button>
 
-        <NavLink
-          to="/register-issue"
-          className={({ isActive }) =>
-            isActive ? "menu-item active" : "menu-item"
-          }
-        >
-          Register Issue
-        </NavLink>
+      <aside className={`sidebar ${open ? "open" : ""}`}>
+        <nav className="sidebar-menu">
+          <NavLink
+            to="/dashboard"
+            className={({ isActive }) =>
+              isActive ? "menu-item active" : "menu-item"
+            }
+            onClick={() => setOpen(false)}
+          >
+            Dashboard
+          </NavLink>
 
-        <NavLink
-          to="/issue-list"
-          className={({ isActive }) =>
-            isActive ? "menu-item active" : "menu-item"
-          }
-        >
-          Received Issue List
-        </NavLink>
-        <NavLink
-          to="/raised-issue-list"
-          className={({ isActive }) =>
-            isActive ? "menu-item active" : "menu-item"
-          }
-        >
-          Raised Issue List
-        </NavLink>
-      </nav>
-    </aside>
+          <NavLink
+            to="/register-issue"
+            className={({ isActive }) =>
+              isActive ? "menu-item active" : "menu-item"
+            }
+            onClick={() => setOpen(false)}
+          >
+            Register Issue
+          </NavLink>
+
+          <NavLink
+            to="/issue-list"
+            className={({ isActive }) =>
+              isActive ? "menu-item active" : "menu-item"
+            }
+            onClick={() => setOpen(false)}
+          >
+            Received Issue List
+          </NavLink>
+
+          <NavLink
+            to="/raised-issue-list"
+            className={({ isActive }) =>
+              isActive ? "menu-item active" : "menu-item"
+            }
+            onClick={() => setOpen(false)}
+          >
+            Raised Issue List
+          </NavLink>
+        </nav>
+      </aside>
+    </>
   );
 }
 

@@ -193,30 +193,70 @@ body {
   }
 }
 
-/* Mobile */
+/* ===== Responsive for Mobile ===== */
 @media (max-width: 480px) {
+  /* Container */
   .register-container {
-    margin: 16px;
-    padding: 18px;
-    border-radius: 14px;
+    margin: 12px;
+    padding: 16px;
+    border-radius: 12px;
   }
 
+  /* Heading */
   .register-container h2 {
-    font-size: 1.35rem;
+    font-size: 1.4rem;
+    margin-bottom: 20px;
   }
 
+  /* Form: single column */
+  .register-container form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* Inputs, Textareas, Selects */
   .register-container select,
   .register-container textarea {
     font-size: 0.9rem;
-    padding: 11px 13px;
+    padding: 10px 12px;
   }
 
+  /* Train No / Description */
+  .register-container textarea {
+    min-height: 90px;
+  }
+
+  /* Image Upload Grid */
   .image-upload-container {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 
+  .image-slot {
+    border-radius: 12px;
+  }
+
+  .image-slot img {
+    border-radius: 12px;
+  }
+
+  /* Add Slot + Label */
+  .add-slot label {
+    font-size: 1.8rem;
+  }
+
+  /* Remove Button */
+  .remove-btn {
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+  }
+
+  /* Submit Button */
   .register-container button {
-    font-size: 0.95rem;
+    font-size: 1rem;
     padding: 12px;
+    border-radius: 10px;
   }
 }
