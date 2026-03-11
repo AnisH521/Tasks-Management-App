@@ -31,7 +31,7 @@
 .issue-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 100%;
+  min-width: 900px; /* keeps table readable on mobile scroll */
 }
 
 .issue-table th,
@@ -80,12 +80,12 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.65);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  padding: 10px;
+  padding: 15px;
 }
 
 /* ===== Modal Card ===== */
@@ -96,10 +96,17 @@
   overflow-y: auto;
   background: #fff;
   border-radius: 12px;
-  padding: 20px;
+  padding: 22px;
   position: relative;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.2);
 }
 
+/* small modal */
+.modal-card.small{
+  max-width: 420px;
+}
+
+/* ===== Close Button ===== */
 .close-modal-btn {
   position: absolute;
   top: 12px;
@@ -147,7 +154,6 @@
   display: flex;
   gap: 12px;
   margin-bottom: 18px;
-  position: relative;
 }
 
 .timeline-dot {
@@ -156,7 +162,6 @@
   background: #2563eb;
   border-radius: 50%;
   margin-top: 4px;
-  z-index: 1;
 }
 
 .timeline-content {
@@ -188,6 +193,7 @@
   cursor: pointer;
   font-size: 12px;
   margin: 5px 5px 0 0;
+  white-space: nowrap;
 }
 
 .forward-btn {
@@ -206,71 +212,162 @@
   background: #1e40af;
 }
 
+.reply-btn:hover {
+  background: #0d8f2e;
+}
+
 .close-ticket-btn:hover {
   background: #b52a37;
 }
 
-/* ===== Responsive Adjustments ===== */
-@media (max-width: 1024px) {
-  .info-grid {
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  }
+/* ===== Modal Forms ===== */
+.form-group{
+  margin-bottom:14px;
 }
 
-@media (max-width: 768px) {
-  .issue-container {
-    padding: 16px;
+.form-group label{
+  display:block;
+  font-size:13px;
+  margin-bottom:5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+  width:100%;
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #d1d5db;
+  font-size:13px;
+}
+
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+.btn-primary{
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  padding:8px 14px;
+  border-radius:6px;
+}
+
+.btn-secondary{
+  background:#6b7280;
+  color:#fff;
+  border:none;
+  padding:8px 14px;
+  border-radius:6px;
+}
+
+/* ========================= */
+/* ===== Responsive ======== */
+/* ========================= */
+
+@media (max-width:1024px){
+
+  .issue-table th,
+  .issue-table td{
+    font-size:0.8rem;
+    padding:8px 10px;
+  }
+
+}
+
+/* ===== Tablet ===== */
+
+@media (max-width:768px){
+
+  .issue-container{
+    padding:15px;
+  }
+
+  .issue-container h2{
+    font-size:1.4rem;
+  }
+
+  .modal-card{
+    width:95%;
+    padding:18px;
+  }
+
+  .info-grid{
+    grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  }
+
+}
+
+/* ===== Mobile ===== */
+
+@media (max-width:480px){
+
+  .issue-container{
+    padding:12px;
+  }
+
+  .issue-container h2{
+    font-size:1.2rem;
   }
 
   .issue-table th,
-  .issue-table td {
-    padding: 8px 10px;
-    font-size: 0.8rem;
-  }
-
-  .modal-card {
-    width: 95%;
-    padding: 16px;
-  }
-
-  .description-box,
-  .timeline-content {
-    font-size: 0.85rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .issue-container h2 {
-    font-size: 1.25rem;
-  }
-
-  .modal-card {
-    width: 100%;
-    padding: 12px;
-  }
-
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .issue-table th,
-  .issue-table td {
-    font-size: 0.75rem;
-    padding: 6px 8px;
-  }
-
-  .timeline-content {
-    font-size: 0.75rem;
-  }
-
-  .timeline-time {
-    font-size: 10px;
+  .issue-table td{
+    font-size:0.75rem;
+    padding:6px 8px;
   }
 
   .forward-btn,
   .reply-btn,
-  .close-ticket-btn {
-    font-size: 11px;
-    padding: 5px 8px;
+  .close-ticket-btn{
+    font-size:10px;
+    padding:4px 7px;
   }
+
+  .modal-card{
+    width:100%;
+    max-height:92vh;
+    padding:14px;
+  }
+
+  .info-grid{
+    grid-template-columns:1fr;
+  }
+
+  .timeline-content{
+    font-size:0.75rem;
+  }
+
+  .timeline-time{
+    font-size:10px;
+  }
+
+  .modal-actions{
+    flex-direction:column;
+  }
+
+  .btn-primary,
+  .btn-secondary{
+    width:100%;
+  }
+
+}
+
+/* ===== Very Small Devices ===== */
+
+@media (max-width:360px){
+
+  .issue-table th,
+  .issue-table td{
+    font-size:0.7rem;
+  }
+
+  .forward-btn,
+  .reply-btn,
+  .close-ticket-btn{
+    font-size:9px;
+    padding:4px 6px;
+  }
+
 }

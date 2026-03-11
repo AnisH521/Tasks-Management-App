@@ -9,28 +9,26 @@ function Issuelist() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Issue detail modal
   const [showModal, setShowModal] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [issueLoading, setIssueLoading] = useState(false);
 
-  // Forward modal
   const [showForwardModal, setShowForwardModal] = useState(false);
   const [forwardTicketId, setForwardTicketId] = useState("");
   const [targetUserId, setTargetUserId] = useState("");
   const [forwardLoading, setForwardLoading] = useState(false);
   const [forwardError, setForwardError] = useState("");
 
-  // Reply modal
+  const [forwardUsers, setForwardUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [replyTicketId, setReplyTicketId] = useState("");
   const [replyMessage, setReplyMessage] = useState("");
   const [replyLoading, setReplyLoading] = useState(false);
   const [replyError, setReplyError] = useState("");
 
-  // Close ticket
   const [closeLoading, setCloseLoading] = useState(false);
-  const [closeError, setCloseError] = useState("");
 
   /* ================= FETCH ISSUE LIST ================= */
   useEffect(() => {
@@ -43,8 +41,6 @@ function Issuelist() {
           body: JSON.stringify({ sortBy: "date" }),
         });
 
-        if (!res.ok) throw new Error("Failed to fetch issues");
-
         const data = await res.json();
         setIssues(data.data || []);
       } catch (err) {
@@ -56,6 +52,30 @@ function Issuelist() {
 
     fetchIssues();
   }, []);
+
+  /* ================= FETCH FORWARDABLE USERS ================= */
+  const fetchForwardUsers = async (ticketId) => {
+    try {
+      setUsersLoading(true);
+
+      const res = await fetch(
+        `${API_BASE_URL}/api/v1/users/getForwardableUsers`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ ticketId }),
+        },
+      );
+
+      const data = await res.json();
+      setForwardUsers(data.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUsersLoading(false);
+    }
+  };
 
   /* ================= OPEN ISSUE MODAL ================= */
   const openIssueModal = async (issueId) => {
@@ -80,7 +100,7 @@ function Issuelist() {
   /* ================= FORWARD HANDLER ================= */
   const handleForward = async () => {
     if (!targetUserId) {
-      setForwardError("Target User ID is required");
+      setForwardError("Target User is required");
       return;
     }
 
@@ -107,7 +127,6 @@ function Issuelist() {
 
       toast.success(data.message || "Ticket forwarded successfully");
 
-      // update status in table
       setIssues((prev) =>
         prev.map((i) =>
           i._id === forwardTicketId ? { ...i, status: "forwarded" } : i,
@@ -132,7 +151,6 @@ function Issuelist() {
 
     try {
       setReplyLoading(true);
-      setReplyError("");
 
       const res = await fetch(`${API_BASE_URL}/api/v1/tickets/add-remarks`, {
         method: "POST",
@@ -147,26 +165,14 @@ function Issuelist() {
       const data = await res.json();
 
       if (!data.status) {
-        setReplyError(data.message || "Something went wrong");
+        setReplyError(data.message);
         return;
       }
 
-      // update the issue timeline in UI
-      setIssues((prev) =>
-        prev.map((i) =>
-          i._id === replyTicketId
-            ? {
-                ...i,
-                replies: [...(i.replies || []), data.data],
-              }
-            : i,
-        ),
-      );
-
-      toast.success(data.message || "Reply added successfully");
+      toast.success("Reply added successfully");
       setShowReplyModal(false);
       setReplyMessage("");
-    } catch (err) {
+    } catch {
       setReplyError("Something went wrong");
     } finally {
       setReplyLoading(false);
@@ -177,7 +183,6 @@ function Issuelist() {
   const handleCloseTicket = async (ticketId) => {
     try {
       setCloseLoading(true);
-      setCloseError("");
 
       const res = await fetch(
         `${API_BASE_URL}/api/v1/tickets/update/${ticketId}`,
@@ -191,30 +196,18 @@ function Issuelist() {
 
       const data = await res.json();
 
-      if (!data.status) {
-        setCloseError(data.message || "Failed to close ticket");
-        return;
-      }
+      if (!data.status) return;
 
       toast.success("Ticket closed successfully");
 
-      // Update status in table
       setIssues((prev) =>
         prev.map((i) => (i._id === ticketId ? { ...i, status: "closed" } : i)),
       );
-
-      // Update selected issue if modal is open
-      if (selectedIssue?._id === ticketId) {
-        setSelectedIssue((prev) => ({ ...prev, status: "closed" }));
-      }
-    } catch {
-      setCloseError("Something went wrong");
     } finally {
       setCloseLoading(false);
     }
   };
 
-  /* ================= STATUS CLASS ================= */
   const getStatusClass = (status) => {
     switch (status?.toLowerCase()) {
       case "open":
@@ -223,8 +216,6 @@ function Issuelist() {
         return "status-closed";
       case "forwarded":
         return "status-forwarded";
-      case "rejected":
-        return "status-rejected";
       default:
         return "";
     }
@@ -238,7 +229,6 @@ function Issuelist() {
       <ToastContainer />
       <h2>All Issue List</h2>
 
-      {/* ================= TABLE ================= */}
       <div className="table-wrapper">
         <table className="issue-table">
           <thead>
@@ -253,167 +243,87 @@ function Issuelist() {
           </thead>
 
           <tbody>
-            {issues.map((issue) => (
-              <tr
-                key={issue._id}
-                style={{ cursor: "pointer" }}
-                onClick={() => openIssueModal(issue._id)}
-              >
-                <td>{issue.category}</td>
-                <td>{issue.subCategory}</td>
-                <td>{issue.complaintDescription}</td>
-                <td>{issue.employeeName}</td>
-                <td className={getStatusClass(issue.status)}>{issue.status}</td>
+            {issues.map((issue) => {
+              const isClosed = issue.status?.toLowerCase() === "closed";
+              const isForwarded = issue.status?.toLowerCase() === "forwarded";
 
-                <td>
-                  {/* Forward Button */}
-                  <button
-                    className="forward-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setForwardTicketId(issue._id);
-                      setShowForwardModal(true);
-                    }}
-                    disabled={
-                      issue.status === "forwarded" || issue.status === "closed"
-                    }
-                    style={{
-                      cursor:
-                        issue.status === "forwarded" ||
-                        issue.status === "closed"
-                          ? "not-allowed"
-                          : "pointer",
-                      opacity:
-                        issue.status === "forwarded" ||
-                        issue.status === "closed"
-                          ? 0.6
-                          : 1,
-                    }}
-                  >
-                    {issue.status === "forwarded"
-                      ? "Forwarded"
-                      : issue.status === "closed"
+              return (
+                <tr
+                  key={issue._id}
+                  onClick={() => openIssueModal(issue._id)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <td>{issue.category}</td>
+                  <td>{issue.subCategory}</td>
+                  <td>{issue.complaintDescription}</td>
+                  <td>{issue.employeeName}</td>
+                  <td className={getStatusClass(issue.status)}>
+                    {issue.status}
+                  </td>
+
+                  <td>
+                    {/* Forward */}
+                    <button
+                      className="forward-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setForwardTicketId(issue._id);
+                        setShowForwardModal(true);
+                        fetchForwardUsers(issue._id);
+                      }}
+                      disabled={isClosed || isForwarded}
+                      style={{
+                        cursor:
+                          isClosed || isForwarded ? "not-allowed" : "pointer",
+                        opacity: isClosed || isForwarded ? 0.6 : 1,
+                      }}
+                    >
+                      {isClosed
                         ? "Closed"
-                        : "Forward"}
-                  </button>
+                        : isForwarded
+                          ? "Forwarded"
+                          : "Forward"}
+                    </button>
 
-                  {/* Reply Button */}
-                  <button
-                    className="reply-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setReplyTicketId(issue._id);
-                      setShowReplyModal(true);
-                    }}
-                    disabled={issue.status === "closed"}
-                    style={{
-                      cursor:
-                        issue.status === "closed" ? "not-allowed" : "pointer",
-                      opacity: issue.status === "closed" ? 0.6 : 1,
-                    }}
-                  >
-                    Reply
-                  </button>
+                    {/* Reply */}
+                    <button
+                      className="reply-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setReplyTicketId(issue._id);
+                        setShowReplyModal(true);
+                      }}
+                      disabled={isClosed}
+                      style={{
+                        cursor: isClosed ? "not-allowed" : "pointer",
+                        opacity: isClosed ? 0.6 : 1,
+                      }}
+                    >
+                      Reply
+                    </button>
 
-                  {/* Close Button */}
-                  <button
-                    className="close-ticket-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCloseTicket(issue._id);
-                    }}
-                    disabled={issue.status === "closed" || closeLoading}
-                    style={{
-                      cursor:
-                        issue.status === "closed" ? "not-allowed" : "pointer",
-                      opacity: issue.status === "closed" ? 0.6 : 1,
-                    }}
-                  >
-                    {issue.status === "closed" ? "Closed" : "Close"}
-                  </button>
-                </td>
-              </tr>
-            ))}
+                    {/* Close */}
+                    <button
+                      className="close-ticket-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCloseTicket(issue._id);
+                      }}
+                      disabled={isClosed || closeLoading}
+                      style={{
+                        cursor: isClosed ? "not-allowed" : "pointer",
+                        opacity: isClosed ? 0.6 : 1,
+                      }}
+                    >
+                      {isClosed ? "Closed" : "Close"}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
-
-      {/* ================= ISSUE DETAIL MODAL ================= */}
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <button
-              className="close-modal-btn"
-              onClick={() => setShowModal(false)}
-            >
-              ✕
-            </button>
-
-            {issueLoading ? (
-              <p>Loading...</p>
-            ) : selectedIssue ? (
-              <>
-                <h2>
-                  {selectedIssue.category} / {selectedIssue.subCategory}
-                </h2>
-
-                <span
-                  className={`status-badge ${getStatusClass(
-                    selectedIssue.status,
-                  )}`}
-                >
-                  {selectedIssue.status.toUpperCase()}
-                </span>
-
-                <div className="info-grid">
-                  <div>
-                    <strong>Section:</strong> {selectedIssue.section}
-                  </div>
-                  <div>
-                    <strong>Department:</strong> {selectedIssue.department}
-                  </div>
-                  <div>
-                    <strong>Train No:</strong> {selectedIssue.train_NO}
-                  </div>
-                  <div>
-                    <strong>Employee:</strong> {selectedIssue.employeeName}
-                  </div>
-                  <div>
-                    <strong>Assigned:</strong> {selectedIssue.assignedUser}
-                  </div>
-                </div>
-
-                <div className="description-box">
-                  <strong>Description</strong>
-                  <p>{selectedIssue.complaintDescription}</p>
-                </div>
-
-                <h3>Action Roadmap</h3>
-                <div className="timeline">
-                  {selectedIssue.replies?.length ? (
-                    selectedIssue.replies.map((r, i) => (
-                      <div className="timeline-item" key={i}>
-                        <div className="timeline-dot"></div>
-                        <div className="timeline-content">
-                          <p className="timeline-user">
-                            {r.sender} ({r.senderRole})
-                          </p>
-                          <p>{r.message}</p>
-                          <span className="timeline-time">
-                            {new Date(r.timestamp).toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p>No replies yet</p>
-                  )}
-                </div>
-              </>
-            ) : null}
-          </div>
-        </div>
-      )}
 
       {/* ================= FORWARD MODAL ================= */}
       {showForwardModal && (
@@ -427,12 +337,23 @@ function Issuelist() {
             </div>
 
             <div className="form-group">
-              <label>Target User ID</label>
-              <input
-                value={targetUserId}
-                onChange={(e) => setTargetUserId(e.target.value)}
-                placeholder="Enter Target User ID"
-              />
+              <label>Select User</label>
+
+              {usersLoading ? (
+                <p>Loading users...</p>
+              ) : (
+                <select
+                  value={targetUserId}
+                  onChange={(e) => setTargetUserId(e.target.value)}
+                >
+                  <option value="">Select User</option>
+                  {forwardUsers.map((user) => (
+                    <option key={user._id} value={user._id}>
+                      {user.name} ({user.role})
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             {forwardError && <p className="error-text">{forwardError}</p>}
@@ -451,48 +372,6 @@ function Issuelist() {
                 disabled={forwardLoading}
               >
                 {forwardLoading ? "Forwarding..." : "Forward"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ================= REPLY MODAL ================= */}
-      {showReplyModal && (
-        <div className="modal-overlay">
-          <div className="modal-card small">
-            <h3>Reply to Ticket</h3>
-
-            <div className="form-group">
-              <label>Ticket ID</label>
-              <input value={replyTicketId} disabled />
-            </div>
-
-            <div className="form-group">
-              <label>Message</label>
-              <textarea
-                value={replyMessage}
-                onChange={(e) => setReplyMessage(e.target.value)}
-                placeholder="Enter your reply"
-              />
-            </div>
-
-            {replyError && <p className="error-text">{replyError}</p>}
-
-            <div className="modal-actions">
-              <button
-                className="btn-secondary"
-                onClick={() => setShowReplyModal(false)}
-              >
-                Cancel
-              </button>
-
-              <button
-                className="btn-primary"
-                onClick={handleReply}
-                disabled={replyLoading}
-              >
-                {replyLoading ? "Sending..." : "Send Reply"}
               </button>
             </div>
           </div>
