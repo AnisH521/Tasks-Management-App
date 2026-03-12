@@ -12,6 +12,9 @@ function Sidebar() {
         ☰
       </button>
 
+      {/* Overlay for mobile */}
+      {open && <div className="sidebar-overlay" onClick={() => setOpen(false)}></div>}
+
       <aside className={`sidebar ${open ? "open" : ""}`}>
         <nav className="sidebar-menu">
           <NavLink

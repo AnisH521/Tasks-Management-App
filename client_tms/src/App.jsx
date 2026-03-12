@@ -10,10 +10,12 @@ import ProtectedRoute from "./controller/Auth/Login/ProtectedRoute.jsx";
 import MainLayout from "./controller/layout/MainLayout/MainLayout.jsx";
 import IssueList from "./controller/Issuelist/Issuelist.jsx";
 import RaisedIssueList from "./controller/RaisedIssueList/RaisedIssueList.jsx";
+import PWAInstall from "./components/PWAInstall/PWAInstall.jsx";
 
 function App() {
   return (
     <>
+      <PWAInstall />
       <Routes>
         <Route path="/" element={<Login />} />
 

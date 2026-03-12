@@ -1,6 +1,6 @@
 /* CONTAINER */
 .login-container {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -8,15 +8,15 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  overflow: hidden;
-  /* prevent scrolling */
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 /* FLIP CARD */
 .flip-card {
   width: 360px;
   perspective: 1200px;
-  margin-top: -20px;
+  margin: 20px 0;
 }
 
 .flip-card-inner {
@@ -24,10 +24,15 @@
   width: 100%;
   transition: transform 0.9s ease;
   transform-style: preserve-3d;
+  min-height: 500px; /* Base height for login */
 }
 
 .flip-card.flipped .flip-card-inner {
   transform: rotateY(180deg);
+}
+
+.flip-card.flipped .flip-card-inner {
+  min-height: 650px; /* Taller for registration */
 }
 
 /* FRONT & BACK */
@@ -35,10 +40,10 @@
 .flip-card-back {
   position: absolute;
   width: 100%;
+  height: 100%;
   backface-visibility: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center;
   box-sizing: border-box;
 }
 
@@ -48,8 +53,9 @@
 
 /* CARD */
 .login {
-  background: rgba(44, 44, 44, 0.5);
-  border: 2px solid #fff;
+  background: rgba(44, 44, 44, 0.7);
+  backdrop-filter: blur(8px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   padding: 30px 26px;
   border-radius: 17px;
   color: #fff;
@@ -57,6 +63,8 @@
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
+  width: 100%;
+  height: 100%;
 }
 
 /* TITLE */
@@ -76,7 +84,6 @@
   max-width: 320px;
   height: 46px;
   margin-bottom: 12px;
-  /* compact spacing */
   padding: 0 16px;
   border-radius: 100px;
   border: none;
@@ -158,21 +165,18 @@ p span {
 /* MOBILE */
 @media (max-width: 600px) {
   .flip-card {
-    width: 90%;
+    width: 100%;
   }
 
   .login {
-    padding: 24px 18px;
+    padding: 20px 15px;
   }
 
-  .login input,
-  .login select,
-  .btn {
-    max-width: 100%;
+  .h1 {
+    font-size: 1.2em;
   }
 
-  .scale-options {
-    flex-wrap: wrap;
-    gap: 6px;
+  .flip-card.flipped .flip-card-inner {
+    min-height: 700px;
   }
 }
