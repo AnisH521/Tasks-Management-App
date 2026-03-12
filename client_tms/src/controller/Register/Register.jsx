@@ -89,7 +89,10 @@ function Register() {
       const data = await response.json();
 
       if (data.status) {
-        toast.success(data.message || "Complaint registered successfully");
+        // toast.success(data.message || "Complaint registered successfully");
+        toast.success("Complaint registered successfully", {
+          onClose: () => navigate("/issue-list"),
+        });
 
         // Reset form
         setCategory("");
