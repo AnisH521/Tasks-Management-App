@@ -69,6 +69,7 @@ function Issuelist() {
       );
 
       const data = await res.json();
+      // console.log("Forwardable Users:", data);
       setForwardUsers(data.data || []);
     } catch (err) {
       console.error(err);
@@ -108,14 +109,17 @@ function Issuelist() {
       setForwardLoading(true);
       setForwardError("");
 
+      // console.log("Ticket ID:", forwardTicketId);
+      // console.log("Target User ID:", targetUserId);
+
       const res = await fetch(`${API_BASE_URL}/api/v1/tickets/forward`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           ticketId: forwardTicketId,
-          targetUserId,
-        }),
+          targetUserId: targetUserId,
+        })
       });
 
       const data = await res.json();
@@ -220,7 +224,7 @@ function Issuelist() {
         return "";
     }
   };
-
+   
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
@@ -348,7 +352,7 @@ function Issuelist() {
                 >
                   <option value="">Select User</option>
                   {forwardUsers.map((user) => (
-                    <option key={user._id} value={user._id}>
+                    <option key={user._id} value={user.userID}>
                       {user.name} ({user.role})
                     </option>
                   ))}
