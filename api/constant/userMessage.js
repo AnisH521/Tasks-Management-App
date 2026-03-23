@@ -11,7 +11,9 @@ export const USER_DEPARTMENTS = {
   Electrical_TRD: "Electrical /TRD",
   Electrical_OP: "Electrical/OP",
   Electrical_Genl: "Electrical /Genl",
-  Signal_and_Telecom: "Signal and Telecom",
+  // Signal_and_Telecom: "Signal and Telecom",
+  SandT_Signal: "S&T(Signal)",
+  SandT_Telecom: "S&T(Telecom)",
   Medical: "Medical",
   Personnel: "Personnel",
   Accounts: "Accounts",
@@ -29,20 +31,22 @@ export const USER_ROLES = {
 };
 
 export const deptPrefixMap = {
-    'Mechanical (C & W)': 'MECH',
-    'Mechanical (D & DM)': 'MECH_D_DM',
-    'Engineering': 'ENG',
-    'Electrical/TRS': 'ELEC_TRS',
-    'Electrical/TRD': 'ELEC_TRD',
-    'Electrical/OP': 'ELEC_OP',
-    'Electrical/Genl': 'ELEC_GEN',
-    'Signal and Telecom': 'ST',
-    'Commercial': 'COM',
-    'Operating': 'OPT',
-    'Administration': 'ADM',
-    'Railway Protection Force': 'RPF',
-    'Store': 'STORE',
-  };
+  'Mechanical (C & W)': 'MECH',
+  'Mechanical (D & DM)': 'MECH_D_DM',
+  'Engineering': 'ENG',
+  'Electrical/TRS': 'ELEC_TRS',
+  'Electrical/TRD': 'ELEC_TRD',
+  'Electrical/OP': 'ELEC_OP',
+  'Electrical/Genl': 'ELEC_GEN',
+  // 'Signal and Telecom': 'ST',
+  'S&T(Signal)': 'SIG',
+  'S&T(Telecom)': 'TEL',
+  'Commercial': 'COM',
+  'Operating': 'OPT',
+  'Administration': 'ADM',
+  'Railway Protection Force': 'RPF',
+  'Store': 'STORE',
+};
 
 // Arrays for validation
 export const VALID_DEPARTMENTS = Object.values(USER_DEPARTMENTS);

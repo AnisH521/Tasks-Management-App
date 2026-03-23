@@ -4,14 +4,15 @@
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   color: #111827;
   background: linear-gradient(135deg, #eef2ff, #f8fafc);
-  min-height: calc(100vh - 80px);
+  min-height: calc(100vh -60px);
   box-sizing: border-box;
 }
 
 /* ===== Heading ===== */
 .issue-container h2 {
   color: #1e3a8a;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
+  margin-top: -20px;
   font-size: 1.6rem;
   font-weight: 600;
   text-align: center;
@@ -22,7 +23,7 @@
   background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;
   overflow-x: auto;
-  max-height: 500px;
+  max-height: 70vh;
   border: 1px solid #d1d5db;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
@@ -31,7 +32,8 @@
 .issue-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 900px; /* keeps table readable on mobile scroll */
+  min-width: 900px;
+  /* keeps table readable on mobile scroll */
 }
 
 .issue-table th,
@@ -98,11 +100,11 @@
   border-radius: 12px;
   padding: 22px;
   position: relative;
-  box-shadow: 0 10px 35px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
 }
 
 /* small modal */
-.modal-card.small{
+.modal-card.small {
   max-width: 420px;
 }
 
@@ -221,153 +223,213 @@
 }
 
 /* ===== Modal Forms ===== */
-.form-group{
-  margin-bottom:14px;
+.form-group {
+  margin-bottom: 14px;
 }
 
-.form-group label{
-  display:block;
-  font-size:13px;
-  margin-bottom:5px;
+.form-group label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 5px;
 }
 
 .form-group input,
 .form-group select,
-.form-group textarea{
-  width:100%;
-  padding:8px;
-  border-radius:6px;
-  border:1px solid #d1d5db;
-  font-size:13px;
+.form-group textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 13px;
 }
 
-.modal-actions{
-  display:flex;
-  justify-content:flex-end;
-  gap:10px;
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
-.btn-primary{
-  background:#2563eb;
-  color:#fff;
-  border:none;
-  padding:8px 14px;
-  border-radius:6px;
+.btn-primary {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
 }
 
-.btn-secondary{
-  background:#6b7280;
-  color:#fff;
-  border:none;
-  padding:8px 14px;
-  border-radius:6px;
+.btn-secondary {
+  background: #de4252;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  min-width: 350px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.25s ease;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn-primary {
+  background: #1976d2;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: #e0e0e0;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* ========================= */
 /* ===== Responsive ======== */
 /* ========================= */
 
-@media (max-width:1024px){
+@media (max-width:1024px) {
 
   .issue-table th,
-  .issue-table td{
-    font-size:0.8rem;
-    padding:8px 10px;
+  .issue-table td {
+    font-size: 0.8rem;
+    padding: 8px 10px;
   }
 
 }
 
 /* ===== Tablet ===== */
 
-@media (max-width:768px){
+@media (max-width:768px) {
 
-  .issue-container{
-    padding:15px;
+  .issue-container {
+    padding: 15px;
   }
 
-  .issue-container h2{
-    font-size:1.4rem;
+  .issue-container h2 {
+    font-size: 1.4rem;
+    margin-top: -50px;
   }
 
-  .modal-card{
-    width:95%;
-    padding:18px;
+  .modal-card {
+    width: 95%;
+    padding: 18px;
   }
 
-  .info-grid{
-    grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  .info-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   }
 
 }
 
 /* ===== Mobile ===== */
 
-@media (max-width:480px){
+@media (max-width:480px) {
 
-  .issue-container{
-    padding:12px;
+  .issue-container {
+    padding: 12px;
   }
 
-  .issue-container h2{
-    font-size:1.2rem;
+  .issue-container h2 {
+    font-size: 1.2rem;
+    margin-top: -50px;
   }
 
   .issue-table th,
-  .issue-table td{
-    font-size:0.75rem;
-    padding:6px 8px;
+  .issue-table td {
+    font-size: 0.75rem;
+    padding: 6px 8px;
   }
 
   .forward-btn,
   .reply-btn,
-  .close-ticket-btn{
-    font-size:10px;
-    padding:4px 7px;
+  .close-ticket-btn {
+    font-size: 10px;
+    padding: 4px 7px;
   }
 
-  .modal-card{
-    width:100%;
-    max-height:92vh;
-    padding:14px;
+  .modal-card {
+    width: 100%;
+    max-height: 92vh;
+    padding: 14px;
   }
 
-  .info-grid{
-    grid-template-columns:1fr;
+  .info-grid {
+    grid-template-columns: 1fr;
   }
 
-  .timeline-content{
-    font-size:0.75rem;
+  .timeline-content {
+    font-size: 0.75rem;
   }
 
-  .timeline-time{
-    font-size:10px;
+  .timeline-time {
+    font-size: 10px;
   }
 
-  .modal-actions{
-    flex-direction:column;
+  .modal-actions {
+    flex-direction: column;
   }
 
   .btn-primary,
-  .btn-secondary{
-    width:100%;
+  .btn-secondary {
+    width: 100%;
   }
 
 }
 
 /* ===== Very Small Devices ===== */
 
-@media (max-width:360px){
+@media (max-width:360px) {
 
   .issue-table th,
-  .issue-table td{
-    font-size:0.7rem;
+  .issue-table td {
+    font-size: 0.7rem;
   }
 
   .forward-btn,
   .reply-btn,
-  .close-ticket-btn{
-    font-size:9px;
-    padding:4px 6px;
+  .close-ticket-btn {
+    font-size: 9px;
+    padding: 4px 6px;
   }
 
 }

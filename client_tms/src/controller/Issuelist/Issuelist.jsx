@@ -130,6 +130,10 @@ function Issuelist() {
       }
 
       toast.success(data.message || "Ticket forwarded successfully");
+       setTimeout(() => {                                                                                      
+  window.location.reload();                                                                                
+ }, 1000);                                                                                                 
+ 
 
       setIssues((prev) =>
         prev.map((i) =>
@@ -185,6 +189,12 @@ function Issuelist() {
 
   /* ================= CLOSE HANDLER ================= */
   const handleCloseTicket = async (ticketId) => {
+    const confirmClose = window.confirm(
+      "Are you sure you want to close this ticket?"
+    );
+
+    if (!confirmClose) return;
+
     try {
       setCloseLoading(true);
 
@@ -195,18 +205,25 @@ function Issuelist() {
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({ status: "closed" }),
-        },
+        }
       );
 
       const data = await res.json();
 
-      if (!data.status) return;
+      if (!data.status) {
+        toast.error("Failed to close ticket");
+        return;
+      }
 
       toast.success("Ticket closed successfully");
 
       setIssues((prev) =>
-        prev.map((i) => (i._id === ticketId ? { ...i, status: "closed" } : i)),
+        prev.map((i) =>
+          i._id === ticketId ? { ...i, status: "closed" } : i
+        )
       );
+    } catch (error) {
+      toast.error("Something went wrong");
     } finally {
       setCloseLoading(false);
     }
@@ -268,6 +285,26 @@ function Issuelist() {
                   <td>
                     {/* Forward */}
                     <button
+  className="forward-btn"
+  onClick={(e) => {
+    e.stopPropagation();
+    setForwardTicketId(issue._id);
+    setShowForwardModal(true);
+    fetchForwardUsers(issue._id);
+  }}
+  disabled={isClosed}
+  style={{
+    cursor: isClosed ? "not-allowed" : "pointer",
+    opacity: isClosed ? 0.6 : 1,
+  }}
+>
+  {isClosed
+    ? "Closed"
+    : isForwarded
+    ? "Forwarded"
+    : "Forward"}
+</button>
+                    {/* <button
                       className="forward-btn"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -276,6 +313,7 @@ function Issuelist() {
                         fetchForwardUsers(issue._id);
                       }}
                       disabled={isClosed || isForwarded}
+                      // disabled={isClosed}
                       style={{
                         cursor:
                           isClosed || isForwarded ? "not-allowed" : "pointer",
@@ -287,7 +325,7 @@ function Issuelist() {
                         : isForwarded
                           ? "Forwarded"
                           : "Forward"}
-                    </button>
+                    </button> */}
 
                     {/* Reply */}
                     <button
@@ -335,10 +373,10 @@ function Issuelist() {
           <div className="modal-card small">
             <h3>Forward Ticket</h3>
 
-            <div className="form-group">
+            {/* <div className="form-group">
               <label>Ticket ID</label>
               <input value={forwardTicketId} disabled />
-            </div>
+            </div> */}
 
             <div className="form-group">
               <label>Select User</label>
@@ -381,6 +419,124 @@ function Issuelist() {
           </div>
         </div>
       )}
+      {/* ================= REPLY MODAL ================= */}
+      {showReplyModal && (
+        <div className="modal-overlay">
+          <div className="modal-card small">
+            <h3>Reply to Ticket</h3>
+
+            <div className="form-group">
+              <label>Ticket ID</label>
+              <input value={replyTicketId} disabled />
+            </div>
+
+            <div className="form-group">
+              <label>Message</label>
+              <textarea
+                value={replyMessage}
+                onChange={(e) => setReplyMessage(e.target.value)}
+                placeholder="Enter your reply"
+              />
+            </div>
+
+            {replyError && <p className="error-text">{replyError}</p>}
+
+            <div className="modal-actions">
+              <button
+                className="btn-secondary"
+                onClick={() => setShowReplyModal(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="btn-primary"
+                onClick={handleReply}
+                disabled={replyLoading}
+              >
+                {replyLoading ? "Sending..." : "Send Reply"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+       {/* ================= ISSUE DETAIL MODAL ================= */}
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <button
+              className="close-modal-btn"
+              onClick={() => setShowModal(false)}
+            >
+              ✕
+            </button>
+
+            {issueLoading ? (
+              <p>Loading...</p>
+            ) : selectedIssue ? (
+              <>
+                <h2>
+                  {selectedIssue.category} / {selectedIssue.subCategory}
+                </h2>
+
+                <span
+                  className={`status-badge ${getStatusClass(
+                    selectedIssue.status,
+                  )}`}
+                >
+                  {selectedIssue.status.toUpperCase()}
+                </span>
+
+                <div className="info-grid">
+                  <div>
+                    <strong>Section:</strong> {selectedIssue.section}
+                  </div>
+                  <div>
+                    <strong>Department:</strong> {selectedIssue.department}
+                  </div>
+                  <div>
+                    <strong>Train No:</strong> {selectedIssue.train_NO}
+                  </div>
+                  <div>
+                    <strong>Employee:</strong> {selectedIssue.employeeName}
+                  </div>
+                  <div>
+                    <strong>Assigned:</strong> {selectedIssue.assignedUser}
+                  </div>
+                </div>
+
+                <div className="description-box">
+                  <strong>Description</strong>
+                  <p>{selectedIssue.complaintDescription}</p>
+                </div>
+
+                <h3>Action Roadmap</h3>
+                <div className="timeline">
+                  {selectedIssue.replies?.length ? (
+                    selectedIssue.replies.map((r, i) => (
+                      <div className="timeline-item" key={i}>
+                        <div className="timeline-dot"></div>
+                        <div className="timeline-content">
+                          <p className="timeline-user">
+                            {r.sender} ({r.senderRole})
+                          </p>
+                          <p>{r.message}</p>
+                          <span className="timeline-time">
+                            {new Date(r.timestamp).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No replies yet</p>
+                  )}
+                </div>
+              </>
+            ) : null}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

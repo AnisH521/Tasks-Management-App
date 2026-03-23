@@ -112,8 +112,7 @@ function Register() {
 
   return (
     <div className="register-container">
-      <h2>Register Complaint</h2>
-
+      <h2>Register Issue</h2>
       <form onSubmit={handleSubmit}>
         {/* CATEGORY */}
         <select value={category} onChange={(e) => setCategory(e.target.value)}>
@@ -185,7 +184,7 @@ function Register() {
               </div>
             ))}
 
-            {images.length < 40 && (
+            {images.length < 4 && (
               <div className="image-slot add-slot" onClick={handleSlotClick}>
                 <label>+</label>
               </div>

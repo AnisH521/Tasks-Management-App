@@ -1,17 +1,18 @@
-/* ===== Page Background ===== */
+/* ===== Global Page Background ===== */
 body {
+  margin: 0;
+  padding: 0;
   min-height: 100vh;
   background: linear-gradient(135deg, #eef2ff, #f8fafc);
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 }
 
-/* ===== Container ===== */
+/* ===== Main Container ===== */
 .register-container {
-  width: 90%;
-  max-width: 1100px; /* 🔥 Wider for desktop */
-  margin: 48px auto;
-  padding: 32px;
-  background: rgba(255, 255, 255, 0.95);
+  width: min(92%, 1100px);
+  margin: 40px auto;
+  padding: clamp(18px, 3vw, 32px);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(10px);
   border-radius: 18px;
   box-shadow:
@@ -23,27 +24,27 @@ body {
 /* ===== Heading ===== */
 .register-container h2 {
   text-align: center;
-  margin-bottom: 26px;
+  margin-bottom: 28px;
   color: #111827;
-  font-size: 1.8rem;
+  font-size: clamp(1.4rem, 2vw, 1.9rem);
   font-weight: 600;
 }
 
-/* ===== Form ===== */
+/* ===== Form Layout ===== */
 .register-container form {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 🔥 Two columns on desktop */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
 }
 
-/* Full width fields */
+/* Full Width Elements */
 .register-container textarea,
 .register-container button,
 .form-group {
   grid-column: span 2;
 }
 
-/* ===== Select & Textarea ===== */
+/* ===== Inputs ===== */
 .register-container select,
 .register-container textarea {
   width: 100%;
@@ -53,17 +54,21 @@ body {
   border: 1px solid #d1d5db;
   outline: none;
   background: #ffffff;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
   color: #111827;
+  box-sizing: border-box;
 }
 
+/* Placeholder */
 .register-container textarea::placeholder {
   color: #9ca3af;
 }
 
+/* Textarea */
 .register-container textarea {
   resize: vertical;
-  min-height: 110px;
+  min-height: 100px;
+  line-height: 1.5;
 }
 
 /* Focus */
@@ -80,27 +85,30 @@ body {
   color: #6b7280;
 }
 
-/* Train No */
-.register-container textarea[placeholder="Train No"] {
-  min-height: 46px;
-  height: 46px;
-  resize: none;
-}
-
-/* ===== Image Upload ===== */
+/* ===== Form Group ===== */
 .form-group label {
   font-size: 0.95rem;
   font-weight: 500;
   color: #374151;
+  display: block;
+  margin-bottom: 8px;
 }
 
+/* ===== Image Upload Container ===== */
 .image-upload-container {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, 140px);
+  /* fixed 4 slots on desktop */
   gap: 14px;
   margin-top: 10px;
+  justify-content: start;
+  width: max-content;
+  /* 🔹 shrink container to content */
+  min-width: 140px;
+  /* at least one slot width */
 }
 
+/* Image Slot */
 .image-slot {
   position: relative;
   aspect-ratio: 1 / 1;
@@ -111,8 +119,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
 
+/* Hover */
+.image-slot:hover {
+  border-color: #2563eb;
+}
+
+/* Image */
 .image-slot img {
   width: 100%;
   height: 100%;
@@ -120,34 +136,36 @@ body {
 }
 
 /* Add Slot */
-.add-slot {
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
 .add-slot label {
-  font-size: 2.2rem;
+  font-size: 2rem;
   color: #2563eb;
+  cursor: pointer;
 }
 
 .add-slot:hover {
-  border-color: #2563eb;
   background: rgba(37, 99, 235, 0.05);
 }
 
 /* Remove Button */
+/* Remove Button - Improved */
 .remove-btn {
   position: absolute;
   top: 6px;
   right: 6px;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   border: none;
   background: rgba(17, 24, 39, 0.75);
   color: #ffffff;
   font-size: 14px;
   cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: all 0.2s ease;
 }
 
 .remove-btn:hover {
@@ -159,33 +177,44 @@ body {
 .register-container button {
   margin-top: 12px;
   padding: 14px;
-  font-size: 1.05rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   color: #ffffff;
   background: linear-gradient(135deg, #2563eb, #1e40af);
   border: none;
   border-radius: 12px;
   cursor: pointer;
   box-shadow: 0 10px 24px rgba(37, 99, 235, 0.35);
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .register-container button:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   box-shadow: 0 14px 32px rgba(37, 99, 235, 0.45);
 }
 
-/* ===== Responsive ===== */
+/* ===== Large Desktop ===== */
+@media (min-width: 1400px) {
+  .register-container {
+    max-width: 1200px;
+  }
+}
 
-/* Tablets */
+/* ===== Tablet ===== */
 @media (max-width: 992px) {
   .register-container {
     width: 94%;
-    padding: 26px;
+    padding: 24px;
   }
 
   .register-container form {
-    grid-template-columns: 1fr; /* 🔥 Single column */
+    grid-template-columns: 1fr;
+  }
+
+  .register-container textarea,
+  .register-container button,
+  .form-group {
+    grid-column: span 1;
   }
 
   .image-upload-container {
@@ -193,70 +222,73 @@ body {
   }
 }
 
-/* ===== Responsive for Mobile ===== */
-@media (max-width: 480px) {
-  /* Container */
+/* ===== Mobile ===== */
+@media (max-width: 768px) {
   .register-container {
-    margin: 12px;
-    padding: 16px;
-    border-radius: 12px;
+    margin: 18px auto;
+    padding: 18px;
+    border-radius: 14px;
   }
 
-  /* Heading */
   .register-container h2 {
-    font-size: 1.4rem;
-    margin-bottom: 20px;
+    font-size: 1.5rem;
   }
 
-  /* Form: single column */
-  .register-container form {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  /* Inputs, Textareas, Selects */
   .register-container select,
   .register-container textarea {
-    font-size: 0.9rem;
-    padding: 10px 12px;
+    font-size: 0.92rem;
+    padding: 12px;
   }
 
-  /* Train No / Description */
+  .image-upload-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .register-container button {
+    padding: 13px;
+  }
+}
+
+/* ===== Small Mobile ===== */
+@media (max-width: 480px) {
+  .register-container {
+    width: 95%;
+    margin: 10px auto;
+    padding: 14px;
+  }
+
+  .register-container h2 {
+    font-size: 1.3rem;
+    margin-bottom: 18px;
+  }
+
+  .register-container select,
   .register-container textarea {
-    min-height: 90px;
+    font-size: 0.88rem;
+    padding: 10px;
   }
 
-  /* Image Upload Grid */
+  .register-container textarea {
+    min-height: 85px;
+  }
+
   .image-upload-container {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
 
-  .image-slot {
-    border-radius: 12px;
-  }
-
-  .image-slot img {
-    border-radius: 12px;
-  }
-
-  /* Add Slot + Label */
-  .add-slot label {
-    font-size: 1.8rem;
-  }
-
-  /* Remove Button */
   .remove-btn {
     width: 22px;
     height: 22px;
     font-size: 12px;
   }
 
-  /* Submit Button */
+  .add-slot label {
+    font-size: 1.6rem;
+  }
+
   .register-container button {
-    font-size: 1rem;
+    font-size: 0.95rem;
     padding: 12px;
-    border-radius: 10px;
   }
 }

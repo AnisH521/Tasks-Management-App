@@ -91,6 +91,8 @@ function Login() {
         isJrScale: isJrScaleFlag,
       });
 
+      console.log("Registration Response:", res.data);
+
       toast.info(`User Registered! ID: ${res.data.user.userID}`, {
         autoClose: false,
       });
@@ -187,7 +189,8 @@ function Login() {
               <option>Electrical /TRD</option>
               <option>Electrical/OP</option>
               <option>Electrical /Genl</option>
-              <option>Signal and Telecom</option>
+              <option>S&T(Signal)</option>
+              <option>S&T(Telecom)</option>
               <option>Medical</option>
               <option>Personnel</option>
               <option>Accounts</option>
